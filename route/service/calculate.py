@@ -7,16 +7,22 @@ from geo.models import City
 from goods.models import Good
 from map.API import MapAPI
 from route.models import HubRoute, AuxiliaryRoute
-from route.path_finder.models import Path, PathConclusion
-from route.path_finder.raw_queries import ROUTES_VIA_WAYPOINT_ZONE_QUERY, ROUTES_VIA_WAYPOINT_COUNTRY_QUERY
+from route.service.models import Path, Special, PathDuration
+from route.service.raw_queries import ROUTES_VIA_WAYPOINT_ZONE_QUERY, ROUTES_VIA_WAYPOINT_COUNTRY_QUERY
 from utils.enums import RouteType, RateType
 from route import models
 
 
 class PathService:
 
+    API_CLASS = MapAPI
+
     @classmethod
-    def find(cls, source: City, dest: City) -> PathConclusion:
+    def set_map_api_class(cls, api_class):
+        cls.API_CLASS = api_class
+
+    @classmethod
+    def paths(cls, source: City, dest: City) -> list:
         hub_routes = cls._select_by_country(source, dest)
         if len(hub_routes) == 0:
             hub_routes = cls._select_by_zone(source, dest)
@@ -25,27 +31,33 @@ class PathService:
 
         print(hub_routes)
         if len(hub_routes) == 0:
-            return PathConclusion(source=source, destination=dest)
+            return []
 
         hub_sources = [route[0].source for route in hub_routes]
         hub_destinations = [route[-1].destination for route in hub_routes]
 
-        source_route_data = MapAPI.distance_duration([source], hub_sources)
-        destination_route_data = MapAPI.distance_duration(hub_destinations, [dest])
+        source_route_data = cls.API_CLASS.distance_duration([source], hub_sources)
+        destination_route_data = cls.API_CLASS.distance_duration(hub_destinations, [dest])
 
-        return cls._path(source_route_data, destination_route_data, hub_routes, source, dest)
+        return cls._build_paths(source_route_data, destination_route_data, hub_routes, source, dest)
 
     @classmethod
-    def calculate(cls, path: Union[Path, models.Path], good: Good):
+    def calculate(cls, path: Union[Path, models.Path], good: Good, special: Special = Special()):
 
         total_cost = 0
-        total_duration = 0
+        total_duration = PathDuration(1, 1)
         total_distance = 0
+
+        if special.departure_date is None:
+            departure = datetime.date.today()
+        else:
+            departure = special.departure_date
 
         if isinstance(path, models.Path):
             routes = path.hub_routes.all() + path.auxiliary_routes.all()
         else:
             routes = path.routes
+
         for route in routes:
 
             if route.is_hub:
@@ -55,7 +67,7 @@ class PathService:
 
             total_cost += cost * route.distance
             total_distance += route.distance
-            total_duration += route.duration
+            total_duration.min += route.duration
 
         path.total_duration = total_duration
         path.total_distance = total_distance
@@ -64,15 +76,15 @@ class PathService:
         return path
 
     @classmethod
-    def _path(cls,
-              source_route_data,
-              destination_route_data,
-              hub_routes,
-              source,
-              dest
-              ) -> PathConclusion:
+    def _build_paths(cls,
+                     source_route_data,
+                     destination_route_data,
+                     hub_routes,
+                     source,
+                     dest
+                     ) -> list:
 
-        path_conclusion = PathConclusion(source=source, destination=dest)
+        paths = []
 
         hub_routes_count = len(hub_routes)
 
@@ -106,9 +118,9 @@ class PathService:
                 end_route.duration = destination_route_data[i][1]
                 path.routes.append(end_route)
 
-            path_conclusion.paths.append(path)
+            paths.append(path)
 
-        return path_conclusion
+        return paths
 
     @classmethod
     def _select_by_zone(cls, source: City, dest: City):

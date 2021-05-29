@@ -44,9 +44,14 @@ class HubRouteCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class DurationSerializer(serializers.Serializer):
+    min = serializers.IntegerField()
+    max = serializers.IntegerField()
+
+
 class PathSerializer(serializers.Serializer):
     total_distance = serializers.IntegerField()
-    total_duration = serializers.IntegerField()
+    total_duration = DurationSerializer()
     total_cost = serializers.DecimalField(max_digits=12, decimal_places=2)
 
     routes = PathRouteReadSerializer(many=True)

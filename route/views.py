@@ -8,8 +8,9 @@ from rest_framework.viewsets import ModelViewSet
 from geo.models import City
 from goods.models import Good
 from .models import HubRoute, Path
-from .path_finder.calculate import PathService
+from .service.calculate import PathService
 from .serializers import HubRouteCreateSerializer, PathConclusionSerializer, PathSerializer
+from .service.models import PathConclusion
 
 
 class PathView(APIView):
@@ -28,12 +29,12 @@ class PathView(APIView):
             'state__country__zone',
         ).get(id=city2_id)
 
-        path_conclusion = PathService.find(city1, city2)
+        paths = PathService.paths(city1, city2)
 
-        for path in path_conclusion.paths:
+        for path in paths:
             PathService.calculate(path, test_good)
-        print(path_conclusion)
-        serializer = PathConclusionSerializer(path_conclusion)
+
+        serializer = PathConclusionSerializer(PathConclusion(source=city1, destination=city2, paths=paths))
         data = serializer.data
         print(datetime.datetime.now() - start)
         return Response(data=data)

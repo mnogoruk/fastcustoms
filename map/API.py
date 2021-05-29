@@ -11,7 +11,7 @@ from herepy import (
 
 
 class MapAPI(AbstractMapAPI):
-    routing_api = RoutingApi('ve_KGVZlFTz7S7wc2HsFJtWMNGN-7WeEpO4cMlIXkeI')
+    routing_api = RoutingApi('9wI-g-2YtvuR_2NNcIHdSnYyIienGppq-JJmlt_UA1g')
 
     @classmethod
     def distance_duration(cls, sources: List[Union[City, Location]], destinations: List[Union[City, Location]]) -> list:
