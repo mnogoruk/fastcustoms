@@ -1,0 +1,1 @@
+LDM_PER_SQUARE = 2.4
