@@ -10,8 +10,10 @@ from utils.db.models import AbstractCreate
 class RouteTimeTable(models.Model):
     weekdays = ArrayField(
         models.IntegerField(),
-        size=7
-    )
+        size=7,
+        default=list
+    )  # each element is day of week. active - 1, inactive - 0
+    preparation_period = models.IntegerField(default=0)  # days
 
 
 class HubRoute(AbstractCreate):
@@ -22,6 +24,8 @@ class HubRoute(AbstractCreate):
     destination = models.ForeignKey(City, on_delete=models.CASCADE, related_name='hub_routes_as_destination')
 
     type = models.CharField(max_length=20, default=RouteType.TRUCK.value, choices=RouteType.choices())
+
+    timetable = models.OneToOneField(RouteTimeTable, on_delete=models.SET_NULL, null=True)
 
     distance = models.IntegerField()
     duration = models.IntegerField()
