@@ -1,10 +1,13 @@
+import datetime
+
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from geo.models import City, Zone
-from map.API import MapAPI
+from map.here.api import MapAPI
 from route.managers import HubRouteManager
 from utils.enums import RouteType
 from utils.db.models import AbstractCreate
+from utils.functions import circle_search
 
 
 class RouteTimeTable(models.Model):
@@ -34,6 +37,15 @@ class HubRoute(AbstractCreate):
 
     objects = HubRouteManager()
 
+    def duration_from_department(self, department_date):
+        if self.timetable is None:
+            return self.duration
+
+        date_ready = department_date + datetime.timedelta(days=self.timetable.preparation_period)
+        weekdays = self.timetable.weekdays
+        num_days = circle_search(weekdays, date_ready.weekday(), 1)
+        return num_days * 24 * 60 + self.duration
+
     def __str__(self):
         return f"{self.source} - {self.destination}"
 
@@ -53,6 +65,8 @@ class AuxiliaryRoute(AbstractCreate):
     Auxiliary route is exact part of path.
     """
 
+    API_CLASS = MapAPI()
+
     source = models.ForeignKey(City, on_delete=models.CASCADE, related_name='auxiliary_routes_as_source')
     destination = models.ForeignKey(City, on_delete=models.CASCADE, related_name='auxiliary_routes_as_destination')
 
@@ -64,6 +78,10 @@ class AuxiliaryRoute(AbstractCreate):
     _duration = None
 
     is_hub = False
+
+    @classmethod
+    def set_map_api_class(cls, api_class):
+        cls.API_CLASS = api_class
 
     @property
     def distance(self):
@@ -86,10 +104,10 @@ class AuxiliaryRoute(AbstractCreate):
         self._distance = value
 
     def update_distance_duration(self):
-        dde = MapAPI.distance_duration([self.source], [self.destination])
-        if dde[2] != 0:
-            self._distance = dde[0]
-            self._duration = dde[1]
+        dde = self.API_CLASS.distance_duration([self.source], [self.destination])
+        if dde[0][2] == 0:
+            self._distance = dde[0][0]
+            self._duration = dde[0][1]
         else:
             self._distance = 0
             self._duration = 0

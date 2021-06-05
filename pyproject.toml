@@ -17,6 +17,8 @@ pydantic = "^1.8.2"
 djangorestframework-simplejwt = "^4.7.1"
 django-cors-headers = "^3.7.0"
 django-measurement = "^3.2.3"
+configparser = "^5.0.2"
+pyjavaproperties = "^0.7"
 
 [tool.poetry.dev-dependencies]
 

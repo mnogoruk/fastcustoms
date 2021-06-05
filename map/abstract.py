@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Union, List
 from geo.models import City, Location
 
 
 class AbstractMapAPI(ABC):
 
-    @classmethod
     @abstractmethod
-    def distance_duration(cls, sources: Union[City, Location], destinations: Union[City, Location]) -> dict:
+    def distance_duration(self, sources: List[Union[City, Location]], destinations: List[Union[City, Location]]) -> list:
         pass

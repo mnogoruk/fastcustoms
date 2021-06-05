@@ -5,7 +5,7 @@ from django.db import connection
 
 from geo.models import City
 from goods.models import Good
-from map.API import MapAPI
+from map.here.api import MapAPI
 from route.models import HubRoute, AuxiliaryRoute
 from route.service.models import Path, Special, PathDuration
 from route.service.raw_queries import ROUTES_VIA_WAYPOINT_ZONE_QUERY, ROUTES_VIA_WAYPOINT_COUNTRY_QUERY
@@ -14,8 +14,7 @@ from route import models
 
 
 class PathService:
-
-    API_CLASS = MapAPI
+    API_CLASS = MapAPI()
 
     @classmethod
     def set_map_api_class(cls, api_class):
@@ -29,7 +28,6 @@ class PathService:
 
         # hub_routes += cls.routes_via_waypoint(source_id=source.id, destination_id=dest.id)
 
-        print(hub_routes)
         if len(hub_routes) == 0:
             return []
 
@@ -49,9 +47,11 @@ class PathService:
         total_distance = 0
 
         if special.departure_date is None:
-            departure = datetime.date.today()
+            departure_date_best = datetime.date.today()
+            departure_date_worst = datetime.date.today()
         else:
-            departure = special.departure_date
+            departure_date_best = special.departure_date
+            departure_date_worst = special.departure_date
 
         if isinstance(path, models.Path):
             routes = path.hub_routes.all() + path.auxiliary_routes.all()
@@ -67,7 +67,21 @@ class PathService:
 
             total_cost += cost * route.distance
             total_distance += route.distance
-            total_duration.min += route.duration
+
+            if isinstance(route, HubRoute):
+                duration_best = (route.duration_from_department(departure_date_best) // 60 + 23) // 24
+                duration_worst = (route.duration_from_department(
+                    departure_date_worst + datetime.timedelta(days=1)) // 60 + 23) // 24 + 1
+
+                total_duration.min += duration_best
+                total_duration.max += duration_worst
+
+                departure_date_best += datetime.timedelta(days=duration_best)
+                departure_date_worst += datetime.timedelta(days=duration_worst)
+
+            else:
+                total_duration.min += (route.duration // 60 + 23) // 24
+                total_duration.max += (route.duration // 60 + 23) // 24 + 1
 
         path.total_duration = total_duration
         path.total_distance = total_distance
