@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(load.from_json)
+        migrations.RunPython(tes_load.from_json)
     ] if not settings.TEST_RUN else \
         [
             migrations.RunPython(tes_load.from_json)

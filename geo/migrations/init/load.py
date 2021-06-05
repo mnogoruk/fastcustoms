@@ -1,4 +1,6 @@
 import json
+from random import choice
+from string import ascii_lowercase
 
 from django.conf import settings
 from django.db import transaction, IntegrityError
@@ -9,11 +11,14 @@ def from_json(apps, schema_editor):
     Country = apps.get_model('geo', 'Country')
     State = apps.get_model('geo', 'State')
     City = apps.get_model('geo', 'City')
+
     with open(settings.BASE_DIR / 'geo/migrations/init/countriesStateCity.json', encoding='UTF-8') as file:
         countries = json.load(file)['data']
+        cont = len(countries)
         with transaction.atomic():
             for country_data in countries:
                 print("load country: ", country_data['name'])
+                print()
                 country = Country.objects.get_or_create(
                     name=country_data['name'],
                     slug=country_data['name'].replace(' ', '-').replace('(', '').replace(')', ''),
@@ -37,7 +42,8 @@ def from_json(apps, schema_editor):
                             city = City.objects.get_or_create(
                                 name=city_data['name'],
                                 slug=city_data['name'].replace(' ', '-').replace('(', '').replace(')',
-                                                                                                  '') + '-' + country.iso2 + '-' + state.code,
+                                                                                                  '') + '-' + country.iso2 + '-' + state.code + '-' + ''.join(
+                                    [choice(ascii_lowercase) for i in range(6)]),
                                 latitude=city_data['latitude'],
                                 longitude=city_data['longitude'],
                                 state=state
