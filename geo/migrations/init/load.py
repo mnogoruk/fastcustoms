@@ -13,6 +13,7 @@ def from_json(apps, schema_editor):
         countries = json.load(file)['data']
         with transaction.atomic():
             for country_data in countries:
+                print("load country: ", country_data['name'])
                 country = Country.objects.get_or_create(
                     name=country_data['name'],
                     slug=country_data['name'].replace(' ', '-').replace('(', '').replace(')', ''),
