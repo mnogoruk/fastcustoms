@@ -36,7 +36,8 @@ class PathService:
 
         source_route_data = cls.API_CLASS.distance_duration([source], hub_sources)
         destination_route_data = cls.API_CLASS.distance_duration(hub_destinations, [dest])
-
+        print("source_data", source_route_data)
+        print("destination_data", destination_route_data)
         return cls._build_paths(source_route_data, destination_route_data, hub_routes, source, dest)
 
     @classmethod
