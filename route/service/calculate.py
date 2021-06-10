@@ -101,6 +101,7 @@ class PathService:
         paths = []
 
         hub_routes_count = len(hub_routes)
+        print(source_route_data)
 
         for i in range(hub_routes_count):
             if source_route_data[i][2] != 0 or destination_route_data[i][2] != 0:
