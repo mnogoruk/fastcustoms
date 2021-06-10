@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
         ('geo', '0003_country_capital'),
     ]
 
-    operations = [
-        migrations.RunPython(set_capital)
-    ] if not settings.TEST_RUN else []
+    # operations = [
+    #     migrations.RunPython(set_capital)
+    # ] if not settings.TEST_RUN else []
