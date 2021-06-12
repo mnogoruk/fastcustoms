@@ -1,10 +1,9 @@
 from rest_framework import serializers
-
-from geo.models import City, Zone, Country, State
-
+from drf_haystack.serializers import HaystackSerializer
+from geo.models import City, Zone, Country, State, Location
+from geo.indexes import CityIndex
 
 class LocationSerializer(serializers.Serializer):
-
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
 
@@ -13,6 +12,11 @@ class ZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Zone
         fields = ['id', 'name', 'slug', 'code']
+
+class CityIndexSerializer(HaystackSerializer):
+    class Meta:
+        index_classes = [CityIndex]
+        fields = ['id', 'name', 'slug', 'state', 'location']
 
 
 class CountrySerializer(serializers.ModelSerializer):
@@ -28,9 +32,8 @@ class StateSerializer(serializers.ModelSerializer):
 
 
 class CitySerializer(serializers.ModelSerializer):
-
     location = LocationSerializer()
 
     class Meta:
         model = City
-        fields = ['id', 'name', 'slug',  'state', 'location']
+        fields = ['id', 'name', 'slug', 'state', 'location']

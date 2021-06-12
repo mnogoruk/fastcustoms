@@ -7,7 +7,9 @@ from rest_framework.viewsets import ModelViewSet
 from geo.filters import CityFilter
 from geo.models import Zone, Country, State, City
 from geo.serializers import ZoneSerializer, CountrySerializer, StateSerializer, CitySerializer
-
+from drf_haystack.viewsets import HaystackViewSet
+from geo.indexes import CityIndex
+from geo.serializers import CityIndexSerializer
 
 class ZoneViewSet(ModelViewSet):
     serializer_class = ZoneSerializer
@@ -28,3 +30,8 @@ class CityViewSet(ModelViewSet):
     serializer_class = CitySerializer
     filter_backends = [CityFilter]
     queryset = City.objects.all()
+
+
+class CityIndexViewSet(HaystackViewSet):
+    index_models = [CityIndex]
+    serializer_class = CityIndexSerializer

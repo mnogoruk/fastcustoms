@@ -5,15 +5,15 @@ class CityFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         params = request.query_params
 
-        state_slug = params.get('state')
-        country_slug = params.get('country')
-        zone_slug = params.get('zone')
-
-        if state_slug:
-            queryset = queryset.filter(state__slug=state_slug)
-        if country_slug:
-            queryset = queryset.filter(state__country__slug=country_slug)
-        if zone_slug:
-            queryset = queryset.filter(state__country__zone__slug=zone_slug)
+        state_name = params.get('state')
+        country_name = params.get('country')
+        zone_name = params.get('zone')
+        
+        if state_name:
+            queryset = queryset.filter(state__name=state_name)
+        if country_name:
+            queryset = queryset.filter(state__country__name=country_name)
+        if zone_name:
+            queryset = queryset.filter(state__country__zone__name=zone_name)
 
         return queryset.order_by('name')
