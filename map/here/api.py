@@ -1,6 +1,6 @@
 import json
 import sys
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Dict
 
 import requests
 from django.conf import settings
@@ -91,7 +91,7 @@ class MapAPI(RoutingApi, AbstractMapAPI):
             "async": "false",
         }
 
-        request_body = self._RoutingApi__prepare_matrix_request_body(
+        request_body = self.__prepare_matrix_request_body(
             origins=origins,
             destinations=destinations,
             matrix_type=matrix_type,
@@ -130,3 +130,81 @@ class MapAPI(RoutingApi, AbstractMapAPI):
             return requests.post(url, **kwargs)
         else:
             return response
+
+    def __prepare_matrix_request_body(
+            self,
+            origins: List[Union[List[float], str]],
+            destinations: List[Union[List[float], str]],
+            matrix_type: MatrixRoutingType = MatrixRoutingType.world,
+            center: Optional[List[float]] = None,
+            radius: Optional[int] = None,
+            profile: Optional[MatrixRoutingProfile] = None,
+            departure: str = None,
+            routing_mode: Optional[MatrixRoutingMode] = None,
+            transport_mode: Optional[MatrixRoutingTransportMode] = None,
+            avoid: Optional[Avoid] = None,
+            truck: Optional[Truck] = None,
+            matrix_attributes: Optional[List[MatrixSummaryAttribute]] = None,
+    ) -> Dict:
+        region_definition = {
+            "type": matrix_type.__str__(),
+        }
+        if center:
+            region_definition["center"] = {"lat": center[0], "lng": center[1]}
+        if radius:
+            region_definition["radius"] = radius
+        request_body = {
+            "regionDefinition": region_definition
+        }
+
+        if profile:
+            request_body["profile"] = profile.__str__()
+        if departure:
+            request_body["departureTime"] = departure
+        if routing_mode:
+            request_body["routingMode"] = routing_mode.__str__()
+        if transport_mode:
+            request_body["transportMode"] = transport_mode.__str__()
+        if matrix_attributes:
+            request_body["matrixAttributes"] = [
+                attribute.__str__() for attribute in matrix_attributes
+            ]
+        if avoid:
+            request_body["avoid"] = {"features": avoid.features, "areas": avoid.areas}
+        if truck:
+            request_body["truck"] = {
+                "shippedHazardousGoods": truck.shipped_hazardous_goods,
+                "grossWeight": truck.gross_weight,
+                "weightPerAxle": truck.weight_per_axle,
+                "height": truck.height,
+                "width": truck.width,
+                "length": truck.length,
+                "tunnelCategory": truck.tunnel_category,
+                "axleCount": truck.axle_count,
+                "type": truck.truck_type,
+                "trailerCount": truck.trailer_count,
+            }
+
+        origin_list = []
+        for i, origin in enumerate(origins):
+            if isinstance(origin, str):
+                origin_waypoint = self._get_coordinates_for_location_name(origin)
+            else:
+                origin_waypoint = origin
+            lat_long = {"lat": origin_waypoint[0], "lng": origin_waypoint[1]}
+            origin_list.append(lat_long)
+        request_body["origins"] = origin_list
+
+        destination_list = []
+        for i, destination in enumerate(destinations):
+            if isinstance(destination, str):
+                destination_waypoint = self._get_coordinates_for_location_name(
+                    destination
+                )
+            else:
+                destination_waypoint = destination
+            lat_long = {"lat": destination_waypoint[0], "lng": destination_waypoint[1]}
+            destination_list.append(lat_long)
+        request_body["destinations"] = destination_list
+
+        return request_body

@@ -48,6 +48,12 @@ INSTALLED_APPS = [
     'pricing',
     'goods',
 ]
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -86,21 +92,21 @@ WSGI_APPLICATION = 'fastcustoms.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {}
-DATABASES['default'] = dj_database_url.config(conn_max_age=600)
+# DATABASES = {}
+# DATABASES['default'] = dj_database_url.config(conn_max_age=600)
+#
+# options = DATABASES['default'].get('OPTIONS', {})
+# options.pop('sslmode', None)
 
-options = DATABASES['default'].get('OPTIONS', {})
-options.pop('sslmode', None)
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'fastcustoms',
-#         'USER': 'postgres',
-#         'PASSWORD': '1',
-#         'PORT': 5432
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'fastcustoms',
+        'USER': 'postgres',
+        'PASSWORD': '1',
+        'PORT': 5432
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

@@ -1,10 +1,7 @@
 from rest_framework import serializers
-
-from geo.models import City, Zone, Country, State
-
+from geo.models import City, Zone, Country, State, Location
 
 class LocationSerializer(serializers.Serializer):
-
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
 
@@ -13,7 +10,6 @@ class ZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Zone
         fields = ['id', 'name', 'slug', 'code']
-
 
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,9 +24,8 @@ class StateSerializer(serializers.ModelSerializer):
 
 
 class CitySerializer(serializers.ModelSerializer):
-
     location = LocationSerializer()
 
     class Meta:
         model = City
-        fields = ['id', 'name', 'slug',  'state', 'location']
+        fields = ['id', 'name', 'slug', 'state', 'location']

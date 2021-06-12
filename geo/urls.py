@@ -1,7 +1,6 @@
 from rest_framework import routers
 
 from geo.views import CityViewSet, StateViewSet, CountryViewSet, ZoneViewSet
-
 urlpatterns = []
 
 router = routers.SimpleRouter()
