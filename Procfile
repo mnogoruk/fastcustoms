@@ -1,0 +1,1 @@
+web: gunicorn fastcustoms.wsgi:application --preload

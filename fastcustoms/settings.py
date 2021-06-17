@@ -92,21 +92,20 @@ WSGI_APPLICATION = 'fastcustoms.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {}
-# DATABASES['default'] = dj_database_url.config(conn_max_age=600)
-#
-# options = DATABASES['default'].get('OPTIONS', {})
-# options.pop('sslmode', None)
+DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'fastcustoms',
-        'USER': 'postgres',
-        'PASSWORD': '1',
-        'PORT': 5432
-    }
-}
+options = DATABASES['default'].get('OPTIONS', {})
+options.pop('sslmode', None)
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'fastcustoms',
+#         'USER': 'postgres',
+#         'PASSWORD': '1',
+#         'PORT': 5432
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
