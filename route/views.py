@@ -9,7 +9,7 @@ from geo.models import City
 from goods.models import Good
 from .models import HubRoute, Path
 from .service.calculate import PathService
-from .serializers import HubRouteCreateSerializer, PathConclusionSerializer, PathSerializer
+from .serializers import HubRouteSerializer, PathConclusionSerializer, PathSerializer
 from .service.models import PathConclusion
 
 
@@ -42,7 +42,7 @@ class PathView(APIView):
 
 class RouteViewSet(ModelViewSet):
     queryset = HubRoute.objects.all()
-    serializer_class = HubRouteCreateSerializer
+    serializer_class = HubRouteSerializer
 
     def get_object(self):
         obj = super().get_object()
