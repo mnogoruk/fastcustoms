@@ -2,12 +2,18 @@ from django.db import transaction
 from rest_framework import serializers
 
 from geo.models import City, Zone
-from geo.serializers import CitySerializer
+from geo.serializers import CitySerializer, CityShortSerializer
 from pricing.models import RouteRate
 from pricing.serializers import RouteRateSerializer
 from utils.enums import RouteType, Currency, RateType, RateUseType
 from utils.serializers.fileds import PureLookUpFiled
-from .models import HubRoute, Path
+from .models import HubRoute, Path, RouteTimeTable
+
+
+class RouteTimeTableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RouteTimeTable
+        fields = ['weekdays', 'preparation_period']
 
 
 class PathRouteReadSerializer(serializers.Serializer):
@@ -20,28 +26,25 @@ class PathRouteReadSerializer(serializers.Serializer):
     type = serializers.ChoiceField(RouteType.choices(), read_only=True)
 
 
-class HubRouteCreateSerializer(serializers.ModelSerializer):
+class HubRouteSerializer(serializers.ModelSerializer):
     source = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
     destination = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
 
     rates = RouteRateSerializer(many=True)
-
-    def create(self, validated_data):
-        source = City.objects.get(**validated_data.pop('source'))
-        destination = City.objects.get(**validated_data.pop('destination'))
-
-        rates = validated_data.pop('rates')
-        with transaction.atomic():
-            route = HubRoute.objects.create(source=source, destination=destination, **validated_data)
-
-            for rate in rates:
-                RouteRate.objects.create(**rate, route=route)
-
-        return route
+    timetable = RouteTimeTableSerializer()
 
     class Meta:
         model = HubRoute
         fields = '__all__'
+
+
+class HubRouteShortSerializer(serializers.ModelSerializer):
+    source = CityShortSerializer()
+    destination = CityShortSerializer()
+
+    class Meta:
+        model = HubRoute
+        fields = ['id', 'source', 'destination', 'type']
 
 
 class DurationSerializer(serializers.Serializer):
