@@ -1,13 +1,17 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from geo.serializers import CitySerializer
+
+
+from geo.serializers import CitySerializer, CityShortSerializer
+
 from pricing.serializers import RouteRateSerializer
 from utils.enums import RouteType
 from utils.serializers.fileds import PureLookUpFiled
 from .models import HubRoute, Path, RouteTimeTable
 
-class TimeTableSerializer(serializers.ModelSerializer):
+
+class RouteTimeTableSerializer(serializers.ModelSerializer):
     class Meta:
         model = RouteTimeTable
         fields = ['weekdays', 'preparation_period']
@@ -28,11 +32,20 @@ class HubRouteSerializer(serializers.ModelSerializer):
     destination = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
 
     rates = RouteRateSerializer(many=True)
-    timetable = TimeTableSerializer()
+    timetable = RouteTimeTableSerializer()
 
     class Meta:
         model = HubRoute
-        fields = '__all__'
+        exclude = ['created_at']
+
+
+class HubRouteShortSerializer(serializers.ModelSerializer):
+    source = CityShortSerializer()
+    destination = CityShortSerializer()
+
+    class Meta:
+        model = HubRoute
+        fields = ['id', 'source', 'destination', 'type']
 
 
 class DurationSerializer(serializers.Serializer):

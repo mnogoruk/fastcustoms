@@ -12,7 +12,7 @@ from utils.functions import circle_search
 
 class RouteTimeTable(models.Model):
     weekdays = ArrayField(
-        models.IntegerField(),
+        models.BooleanField(),
         size=7,
         default=list
     )  # each element is day of week. active - 1, inactive - 0

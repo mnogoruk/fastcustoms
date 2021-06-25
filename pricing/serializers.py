@@ -7,7 +7,7 @@ from pricing.models import RouteRate, ZoneRate
 class RouteRateSerializer(serializers.ModelSerializer):
     class Meta:
         model = RouteRate
-        exclude = ['route']
+        exclude = ['route', 'created_at']
 
 
 class ZoneRateSerializer(serializers.ModelSerializer):
@@ -15,4 +15,4 @@ class ZoneRateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ZoneRate
-        fields = '__all__'
+        exclude = ['created_at']
