@@ -35,7 +35,7 @@ class HubRouteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HubRoute
-        fields = '__all__'
+        exclude = ['created_at']
 
 
 class HubRouteShortSerializer(serializers.ModelSerializer):

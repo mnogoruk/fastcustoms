@@ -7,7 +7,6 @@ from pricing.serializers import ZoneRateSerializer
 from route.models import HubRoute, RouteTimeTable
 from route.serializers import HubRouteSerializer
 
-
 class HubRouteCreateUpdateAdminSerializer(HubRouteSerializer):
 
     def validate_source(self, source):
@@ -28,8 +27,18 @@ class HubRouteCreateUpdateAdminSerializer(HubRouteSerializer):
         return destination
 
     def validate_timetable(self, timetable):
-        print(timetable)
+        weekdays = timetable['weekdays']
+        if len(weekdays) != 7:
+            raise ValidationError("'weekdays' must contains 7 items.")
         return timetable
+
+    def validate_rates(self, rates):
+        # TODO: validate intersections
+        if len(rates) > 20:
+            raise ValidationError("Limit of rates exceeded. Maximum is 20.")
+        if len(rates) < 1:
+            raise ValidationError("Limit of rates exceeded. Minimum is 1.")
+        return rates
 
     def create(self, validated_data):
         rates = validated_data.pop('rates')
@@ -70,7 +79,8 @@ class HubRouteCreateUpdateAdminSerializer(HubRouteSerializer):
 
     class Meta:
         model = HubRoute
-        fields = '__all__'
+        exclude = ['created_at']
+
 
 class ZoneRateCreateUpdateAdminSerializer(ZoneRateSerializer):
     pass
