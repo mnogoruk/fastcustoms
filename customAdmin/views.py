@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from customAdmin.serializers import HubRouteCreateUpdateAdminSerializer, ZoneRatesCreateUpdateAdminSerializer
+from customAdmin.serializers import HubRouteAdminSerializer, ZoneRatesAdminSerializer
 from geo.models import Zone
 from geo.serializers import ZoneSerializer
 from route.models import HubRoute
@@ -12,7 +12,7 @@ from route.serializers import HubRouteShortSerializer
 
 
 class RouteView(ModelViewSet, FullnessMixin):
-    serializer_class = HubRouteCreateUpdateAdminSerializer
+    serializer_class = HubRouteAdminSerializer
     queryset = HubRoute.objects.all()
 
     def get_queryset(self):
@@ -24,16 +24,16 @@ class RouteView(ModelViewSet, FullnessMixin):
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
-            return HubRouteCreateUpdateAdminSerializer
+            return HubRouteAdminSerializer
         fullness = self.fullness()
         if fullness == self.FullnessMode.FULL:
-            return HubRouteCreateUpdateAdminSerializer
+            return HubRouteAdminSerializer
         else:
             return HubRouteShortSerializer
 
 
 class ZoneRateView(ModelViewSet):
-    serializer_class = ZoneRatesCreateUpdateAdminSerializer
+    serializer_class = ZoneRatesAdminSerializer
     queryset = Zone.objects.all()
 
     @action(detail=False, methods=['get'], name='Zone summary', url_path='summary', url_name='zone-summary')
