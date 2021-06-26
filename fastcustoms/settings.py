@@ -156,5 +156,4 @@ REST_FRAMEWORK = {
 }
 
 TEST_RUNNER = 'test.common.runner.TestRunner'
-print(locals())
 django_heroku.settings(locals())
