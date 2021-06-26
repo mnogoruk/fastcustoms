@@ -54,14 +54,3 @@ class PathViewSet(ModelViewSet):
     serializer_class = PathSerializer
 
 
-class TestView(APIView):
-
-    def get(self, request, **kwargs):
-        from django.db import connection
-
-        # with connection.cursor() as cursor:
-        #     cursor.execute()
-        #     rows = cursor.fetchall()
-        #     print(to_routes(rows))
-
-        return Response(data=[])
