@@ -1,11 +1,12 @@
 from django.db import transaction
-from rest_framework.serializers import ValidationError
+from rest_framework.serializers import ValidationError, ModelSerializer
 
-from geo.models import City
-from pricing.models import RouteRate
+from geo.models import City, Zone
+from pricing.models import RouteRate, ZoneRate
 from pricing.serializers import ZoneRateSerializer
 from route.models import HubRoute, RouteTimeTable
 from route.serializers import HubRouteSerializer
+
 
 class HubRouteCreateUpdateAdminSerializer(HubRouteSerializer):
 
@@ -82,5 +83,33 @@ class HubRouteCreateUpdateAdminSerializer(HubRouteSerializer):
         exclude = ['created_at']
 
 
-class ZoneRateCreateUpdateAdminSerializer(ZoneRateSerializer):
-    pass
+class ZoneRatesCreateUpdateAdminSerializer(ModelSerializer):
+    rates = ZoneRateSerializer(many=True)
+
+    def validate_rates(self, rates):
+        # TODO: validate intersections
+        if len(rates) > 20:
+            raise ValidationError("Limit of rates exceeded. Maximum is 20.")
+        if len(rates) < 1:
+            raise ValidationError("Limit of rates exceeded. Minimum is 1.")
+        return rates
+
+    def create(self, validated_data):
+        rates = validated_data.pop('rates')
+        zone = super(ZoneRatesCreateUpdateAdminSerializer, self).create(validated_data)
+        for rate in rates:
+            ZoneRate.objects.create(**rate, zone=zone)
+        return zone
+
+    def update(self, zone: Zone, validated_data):
+        rates = validated_data.pop('rates')
+        zone = super(ZoneRatesCreateUpdateAdminSerializer, self).update(zone, validated_data)
+        zone.rates.all().delete()
+        for rate in rates:
+            ZoneRate.objects.create(**rate, zone=zone)
+        return zone
+
+
+    class Meta:
+        model = Zone
+        fields = '__all__'

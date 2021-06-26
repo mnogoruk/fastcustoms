@@ -11,8 +11,8 @@ class RouteRateSerializer(serializers.ModelSerializer):
 
 
 class ZoneRateSerializer(serializers.ModelSerializer):
-    zone = serializers.PrimaryKeyRelatedField(queryset=Zone.objects.all())
 
     class Meta:
         model = ZoneRate
-        exclude = ['created_at']
+        exclude = ['zone', 'created_at']
+
