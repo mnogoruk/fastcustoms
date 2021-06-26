@@ -1,13 +1,12 @@
-from rest_framework import routers
+from rest_framework.routers import SimpleRouter
 
 from geo.views import CityViewSet, StateViewSet, CountryViewSet, ZoneViewSet
-urlpatterns = []
 
-router = routers.DefaultRouter()
+router = SimpleRouter()
 
 router.register('cities', CityViewSet)
 router.register('states', StateViewSet)
 router.register('countries', CountryViewSet)
 router.register('zones', ZoneViewSet)
 
-urlpatterns += router.urls
+urlpatterns = router.urls
