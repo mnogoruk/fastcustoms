@@ -30,9 +30,6 @@ class HubRouteSerializer(serializers.ModelSerializer):
     source = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
     destination = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
 
-    rates = RouteRateSerializer(many=True)
-    timetable = RouteTimeTableSerializer()
-
     class Meta:
         model = HubRoute
         exclude = ['created_at']
