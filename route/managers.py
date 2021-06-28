@@ -1,4 +1,4 @@
-from django.db.models import Manager
+from django.db.models import Manager, Sum
 
 from geo.models import Zone, Country
 
@@ -16,3 +16,6 @@ class HubRouteManager(Manager):
             source__state__country=source,
             destination__state__country=dest
         )
+
+    def with_additional_services_cost(self):
+        return self.annotate(additional_services_cost=Sum('additional_services__price'))

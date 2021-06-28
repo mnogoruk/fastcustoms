@@ -52,6 +52,8 @@ class RateType(SelectableMixin, Enum):
     SIZE = 'SIZE'
     LDM = 'LDM'
 
+    __default__ = MASS
+
 
 class MeasurementUnits(SelectableMixin, Enum):
     KILOGRAM = 'kg'

@@ -36,6 +36,7 @@ class ZoneRate(AbstractRate):
     def __str__(self):
         return f"{self.zone}: {self.range_from} - {self.range_to} ({self.price_per_unit})"
 
+
 class ServiceAdditional(AbstractCreate):
     name = models.CharField(max_length=120)
     price = models.DecimalField(max_digits=20, decimal_places=2)
@@ -45,6 +46,7 @@ class ServiceAdditional(AbstractCreate):
 
     def __str__(self):
         return f"{self.route}: {self.name}"
+
 
 class ServiceRanked(AbstractCreate):
     name = models.CharField(max_length=120)

@@ -2,6 +2,7 @@ import datetime
 from typing import Union
 
 from django.db import connection
+from django.db.models import Sum
 
 from geo.models import City
 from goods.models import Good
@@ -11,7 +12,7 @@ from route.service.models import Path, Special, PathDuration
 from route.service.raw_queries import ROUTES_VIA_WAYPOINT_ZONE_QUERY, ROUTES_VIA_WAYPOINT_COUNTRY_QUERY
 from utils.enums import RouteType, RateType
 from route import models
-
+from django.core.exceptions import ObjectDoesNotExist
 
 class PathService:
     API_CLASS = MapAPI()
@@ -166,14 +167,15 @@ class PathService:
     @classmethod
     def cost_of_hub_route(cls, route: HubRoute, good: Good):
 
-        cost_ldm, cost_size, cost_mass = cls._cost_of_ratable(route, good)
+        cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good)
+        cost_service = cls.cost_of_hub_route(route, good)
 
-        return max(cost_ldm, cost_size, cost_mass)
+        return max(cost_ldm, cost_size, cost_mass) + cost_service
 
     @classmethod
     def cost_of_auxiliary_route(cls, route: AuxiliaryRoute, good: Good):
         zone = route.source.state.country.zone
-        cost_ldm, cost_size, cost_mass = cls._cost_of_ratable(zone, good)
+        cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good)
 
         return max(cost_ldm, cost_size, cost_mass)
 
@@ -200,35 +202,50 @@ class PathService:
         return routes
 
     @classmethod
-    def _cost_of_ratable(cls, ratable, good):
+    def cost_by_services(cls, route: HubRoute, good: Good):
+        services_cost = route.additional_services.aggregate(sum=Sum('price'))['sum'] or 0
+        ranked_services = route.ranked_services
+        services_cost = float(services_cost)
+        for service in ranked_services.all():
+            if service.rank_type == RateType.MASS.value:
+                services_cost += float(service.price_per_unit) * float(good.total_mass)
+            elif service.rank_type == RateType.SIZE.value:
+                services_cost += float(service.price_per_unit) * float(good.total_volume)
+            elif service.rank_type == RateType.LDM.value:
+                services_cost += float(service.price_per_unit) * float(good.total_ldm)
+
+        return services_cost
+
+    @classmethod
+    def cost_by_ratable(cls, ratable, good):
         try:
             rate_ldm = ratable.rates.get(
                 range_from__lte=good.total_ldm,
                 range_to__gt=good.total_ldm,
                 type=RateType.LDM.value
             )
-        except Exception:
+        except ObjectDoesNotExist:
             cost_ldm = 0
         else:
-            cost_ldm = rate_ldm.price_per_unit * good.total_ldm
+            cost_ldm = float(rate_ldm.price_per_unit) * good.total_ldm
         try:
             rate_size = ratable.rates.get(
                 range_from__lte=good.total_volume,
                 range_to__gt=good.total_volume,
                 type=RateType.SIZE.value
             )
-        except Exception:
+        except ObjectDoesNotExist:
             cost_size = 0
         else:
-            cost_size = rate_size.price_per_unit * good.total_volume
+            cost_size = float(rate_size.price_per_unit) * good.total_volume
         try:
             rate_mass = ratable.rates.get(
                 range_from__lte=good.total_mass,
                 range_to__gt=good.total_mass,
                 type=RateType.MASS.value
             )
-        except Exception:
+        except ObjectDoesNotExist:
             cost_mass = 0
         else:
-            cost_mass = rate_mass.price_per_unit * good.total_mass
+            cost_mass = float(rate_mass.price_per_unit) * good.total_mass
         return cost_ldm, cost_size, cost_mass
