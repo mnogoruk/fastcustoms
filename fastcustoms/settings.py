@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'route',
     'pricing',
     'goods',
+    'order',
     'customAdmin'
 ]
 CACHES = {
