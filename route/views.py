@@ -1,43 +1,24 @@
-import datetime
-
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView, CreateAPIView
 from rest_framework.viewsets import ModelViewSet
 
-from geo.models import City
-from goods.models import Good
 from .models import HubRoute, Path
-from .service.calculate import PathService
-from .serializers import HubRouteSerializer, PathConclusionSerializer, PathSerializer
-from .service.models import PathConclusion
+from .serializers import HubRouteSerializer, PathConclusionSerializer, PathSerializer, PathToCalculateSerializer
+from .service.path import PathCalculator
 
 
-class PathView(APIView):
+class PathView(GenericAPIView):
 
-    def get(self, request: Request, *args, **kwargs):
-        start = datetime.datetime.now()
-        city1_id = request.query_params['city1']
-        city2_id = request.query_params['city2']
+    def post(self, request: Request, *args, **kwargs):
+        print(request.data)
+        serializer = PathToCalculateSerializer(data=request.data, context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
 
-        test_good = Good(total_volume=1, total_ldm=1, total_mass=1)
+        path_calculator = PathCalculator(**serializer.validated_data)
 
-        city1 = City.objects.select_related(
-            'state__country__zone',
-        ).get(id=city1_id)
-        city2 = City.objects.select_related(
-            'state__country__zone',
-        ).get(id=city2_id)
-
-        paths = PathService.paths(city1, city2)
-
-        for path in paths:
-            PathService.calculate(path, test_good)
-
-        serializer = PathConclusionSerializer(PathConclusion(source=city1, destination=city2, paths=paths))
-        data = serializer.data
-        print(datetime.datetime.now() - start)
-        return Response(data=data)
+        serializer = PathConclusionSerializer(path_calculator.get_path_conclusion())
+        return Response(data=serializer.data)
 
 
 class RouteViewSet(ModelViewSet):
@@ -54,14 +35,3 @@ class PathViewSet(ModelViewSet):
     serializer_class = PathSerializer
 
 
-class TestView(APIView):
-
-    def get(self, request, **kwargs):
-        from django.db import connection
-
-        # with connection.cursor() as cursor:
-        #     cursor.execute()
-        #     rows = cursor.fetchall()
-        #     print(to_routes(rows))
-
-        return Response(data=[])

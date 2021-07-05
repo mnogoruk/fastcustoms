@@ -1,8 +1,8 @@
-from rest_framework import routers
+from rest_framework.routers import SimpleRouter
 
-from .views import RouteView
-urlpatterns = []
+from .views import RouteView, ZoneRateView
 
-router = routers.DefaultRouter()
+router = SimpleRouter()
 router.register('admin-routes', RouteView)
-urlpatterns += router.urls
+router.register('admin-zones', ZoneRateView)
+urlpatterns = router.urls

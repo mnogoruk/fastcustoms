@@ -24,7 +24,6 @@ class PureLookUpFiled(serializers.Field):
         assert len(intersected_fields) > 0, "No intersections between lookup fields and input data fields"
         for filed in intersected_fields:
             ret[filed] = data[filed]
-        print(ret)
         return ret
 
     def to_representation(self, value):

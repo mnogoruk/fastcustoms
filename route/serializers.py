@@ -1,14 +1,14 @@
-from django.db import transaction
 from rest_framework import serializers
 
 
-
 from geo.serializers import CitySerializer, CityShortSerializer
-
-from pricing.serializers import RouteRateSerializer
+from goods.models import Box, Container, Good
+from goods.serializers import GoodSerializer
+from order.models import Special
+from utils.calculation import ldm_from_size
 from utils.enums import RouteType
 from utils.serializers.fileds import PureLookUpFiled
-from .models import HubRoute, Path, RouteTimeTable
+from route.models import HubRoute, RouteTimeTable
 
 
 class RouteTimeTableSerializer(serializers.ModelSerializer):
@@ -30,9 +30,6 @@ class PathRouteReadSerializer(serializers.Serializer):
 class HubRouteSerializer(serializers.ModelSerializer):
     source = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
     destination = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
-
-    rates = RouteRateSerializer(many=True)
-    timetable = RouteTimeTableSerializer()
 
     class Meta:
         model = HubRoute
@@ -60,10 +57,6 @@ class PathSerializer(serializers.Serializer):
 
     routes = PathRouteReadSerializer(many=True)
 
-    def create(self, validated_data):
-        print(validated_data)
-        return Path.objects.create()
-
 
 class PathConclusionSerializer(serializers.Serializer):
     source = CitySerializer()
@@ -71,3 +64,18 @@ class PathConclusionSerializer(serializers.Serializer):
 
     paths = PathSerializer(many=True)
 
+
+class SpecialSerializer(serializers.ModelSerializer):
+    departure_date = serializers.DateField(required=False)
+
+    class Meta:
+        model = Special
+        exclude = ['id']
+
+
+class PathToCalculateSerializer(serializers.Serializer):
+    source = PureLookUpFiled(CitySerializer(), lookup_fields=['id'])
+    destination = PureLookUpFiled(CitySerializer(), lookup_fields=['id'])
+
+    good = GoodSerializer(required=True)
+    special = SpecialSerializer(required=False)

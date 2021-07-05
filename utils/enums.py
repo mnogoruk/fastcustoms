@@ -5,8 +5,8 @@ class SelectableMixin:
 
     @classmethod
     def choices(cls):
-        return [(member.name, member.value) for member in cls.__members__.values()]
-
+        choices = [(member.name, member.value) for member in cls.__members__.values()]
+        return choices
 
 class RouteType(SelectableMixin, Enum):
     TRUCK = 'TRUCK'
@@ -20,7 +20,7 @@ class RouteType(SelectableMixin, Enum):
 
 class BoxType(SelectableMixin, Enum):
     BOX = 'BOX'
-    PALLET = 'PELLET'
+    PALLET = 'PALLET'
 
     @classmethod
     def default(cls):
@@ -51,6 +51,8 @@ class RateType(SelectableMixin, Enum):
     MASS = 'MASS'
     SIZE = 'SIZE'
     LDM = 'LDM'
+
+    __default__ = MASS
 
 
 class MeasurementUnits(SelectableMixin, Enum):
