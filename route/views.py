@@ -11,6 +11,7 @@ from .service.path import PathCalculator
 class PathView(GenericAPIView):
 
     def post(self, request: Request, *args, **kwargs):
+        print(request.data)
         serializer = PathToCalculateSerializer(data=request.data, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
 

@@ -6,7 +6,7 @@ from django.db.models import Sum
 
 from geo.models import City
 from map.here.api import MapAPI
-from route.models import HubRoute, AuxiliaryRoute
+from route.models import HubRoute, RouteInPath
 from route.service.models import Path, PathDuration, Good, Special
 from route.service.raw_queries import ROUTES_VIA_WAYPOINT_ZONE_QUERY, ROUTES_VIA_WAYPOINT_COUNTRY_QUERY
 from utils.enums import RouteType, RateType
@@ -110,10 +110,11 @@ class PathService:
             hub_route = hub_routes[i]
 
             if source.id != hub_route[0].source_id:
-                begin_route = AuxiliaryRoute(
+                begin_route = RouteInPath(
                     source=source,
                     destination=hub_route[0].source,
                     type=RouteType.TRUCK.value,
+                    is_hub=False
                 )
                 begin_route.distance = source_route_data[i][0]
                 begin_route.duration = source_route_data[i][1]
@@ -123,10 +124,11 @@ class PathService:
                 path.routes.append(route)
 
             if dest.id != hub_route[-1].destination_id:
-                end_route = AuxiliaryRoute(
+                end_route = RouteInPath(
                     source=hub_route[-1].destination,
                     destination=dest,
                     type=RouteType.TRUCK.value,
+                    is_hub=False
                 )
                 end_route.distance = destination_route_data[i][0]
                 end_route.duration = destination_route_data[i][1]
@@ -170,7 +172,7 @@ class PathService:
         return max(cost_ldm, cost_size, cost_mass) + cost_service
 
     @classmethod
-    def cost_of_auxiliary_route(cls, route: AuxiliaryRoute, good: Good):
+    def cost_of_auxiliary_route(cls, route: RouteInPath, good: Good):
         zone = route.source.state.country.zone
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good)
 

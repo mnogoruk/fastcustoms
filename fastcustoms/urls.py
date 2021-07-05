@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('geo/', include('geo.urls')),
     path('route/', include('route.urls')),
+    path('order/', include('order.urls')),
     path('api-admin/', include('customAdmin.urls'))
 ]

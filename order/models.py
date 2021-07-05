@@ -24,3 +24,4 @@ class Order(models.Model):
     path = models.OneToOneField(Path, on_delete=models.CASCADE, related_name='order')
     good = models.OneToOneField(Good, on_delete=models.CASCADE, related_name='order')
     special = models.OneToOneField(Special, on_delete=models.CASCADE, related_name='order')
+    time_stamp = models.DateTimeField(auto_created=True)

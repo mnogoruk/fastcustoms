@@ -3,12 +3,15 @@ from django.db import models
 from utils.calculation import ldm_from_size
 from utils.enums import ContainerType, BoxType
 from .calculation import boxes_summary
+from .managers import GoodCreatableManager
 
 
 class Good(models.Model):
     total_volume = models.FloatField(blank=True, default=0, null=True)
     total_ldm = models.FloatField(blank=True, default=0)
     total_mass = models.FloatField(blank=True, default=0)
+
+    creatable = GoodCreatableManager()
 
     def recalculate_params(self):
         params = boxes_summary(self.boxes.all())

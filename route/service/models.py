@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Union
 from geo.models import City
 from goods.calculation import boxes_summary
-from route.models import HubRoute, AuxiliaryRoute
+from route.models import HubRoute, RouteInPath
 from utils.calculation import ldm_from_size
 
 
@@ -19,7 +19,7 @@ class Path:
     total_duration: PathDuration = PathDuration(0, 0)  # minutes
     total_cost: float = 0  # euro
 
-    routes: List[Union[HubRoute, AuxiliaryRoute]] = field(default_factory=list)
+    routes: List[Union[HubRoute, RouteInPath]] = field(default_factory=list)
 
 
 @dataclass

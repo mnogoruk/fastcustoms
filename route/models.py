@@ -2,9 +2,11 @@ import datetime
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import Manager
+
 from geo.models import City, Zone
 from map.here.api import MapAPI
-from route.managers import HubRouteManager
+from route.managers import HubRouteManager, PathCreatableManager
 from utils.enums import RouteType
 from utils.db.models import AbstractCreate
 from utils.functions import circle_search
@@ -51,33 +53,28 @@ class HubRoute(AbstractCreate):
 
 
 class Path(models.Model):
-    hub_routes = models.ManyToManyField(HubRoute, related_name='paths')
     total_distance = models.IntegerField(default=0)
-    total_duration = models.IntegerField(default=0)
+    total_duration_min = models.IntegerField(default=0)
+    total_duration_max = models.IntegerField(default=0)
     total_cost = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
-    # for auxiliary routes look at AuxiliaryRoute
+    creatable = PathCreatableManager()
+    objects = Manager()
 
-
-class AuxiliaryRoute(AbstractCreate):
-    """
-    Auxiliary routes distance and duration - data taken from map API, so we can't store it.
-    Auxiliary route is exact part of path.
-    """
+class RouteInPath(AbstractCreate):
 
     API_CLASS = MapAPI()
 
-    source = models.ForeignKey(City, on_delete=models.CASCADE, related_name='auxiliary_routes_as_source')
-    destination = models.ForeignKey(City, on_delete=models.CASCADE, related_name='auxiliary_routes_as_destination')
-
+    source = models.ForeignKey(City, on_delete=models.CASCADE, related_name='path_routes_as_source')
+    destination = models.ForeignKey(City, on_delete=models.CASCADE, related_name='path_routes_as_destination')
     type = models.CharField(max_length=20, default=RouteType.TRUCK.value, choices=RouteType.choices())
 
-    path = models.ForeignKey(Path, on_delete=models.CASCADE, related_name='auxiliary_routes', null=True)
+    path = models.ForeignKey(Path, on_delete=models.CASCADE, related_name='routes', null=True)
 
-    _distance = None
-    _duration = None
+    _distance = models.IntegerField(null=True)
+    _duration = models.IntegerField(null=True)
 
-    is_hub = False
+    is_hub = models.BooleanField()
 
     @classmethod
     def set_map_api_class(cls, api_class):
@@ -111,6 +108,3 @@ class AuxiliaryRoute(AbstractCreate):
         else:
             self._distance = 0
             self._duration = 0
-
-    def __str__(self):
-        return f"{self.source} - {self.destination}"
