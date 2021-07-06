@@ -31,7 +31,6 @@ class PathCreatableManager(Manager):
                                              total_duration_max=total_duration['max'],
                                              total_cost=total_cost)
             for route_data in routes:
-                print(route_data)
                 if not route_data['is_hub']:
                     route_data.pop('distance')
                     route_data.pop('duration')
