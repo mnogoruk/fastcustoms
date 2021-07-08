@@ -41,7 +41,7 @@ class PathCalculator:
     @classmethod
     def get_place(cls, place_id):
         return City.objects.select_related(
-            'state__country__zone',
+            'state__zone',
         ).get(id=place_id)
 
     def __init__(self, **data):
