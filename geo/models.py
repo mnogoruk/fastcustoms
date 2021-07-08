@@ -27,8 +27,6 @@ class Country(models.Model):
 
     capital = models.OneToOneField('City', on_delete=models.SET_NULL, null=True)
 
-    zone = models.ForeignKey(Zone, on_delete=models.SET_NULL, null=True)
-
     def __str__(self):
         return f"{self.name}"
 
@@ -39,6 +37,7 @@ class State(models.Model):
     code = models.CharField(max_length=50, null=True)
 
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True)
+    zone = models.ForeignKey(Zone, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f"{self.name}"
