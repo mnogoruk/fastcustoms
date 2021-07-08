@@ -40,8 +40,8 @@ class ZoneRateView(ModelViewSet):
     def zone_summary(self, request):
         res = []
         zones = Zone.objects.annotate(
-            states_count=Count('state', distinct=True),
-            city_count=Count('state__city', distinct=True)
+            states_count=Count('states', distinct=True),
+            city_count=Count('states__cities', distinct=True)
         )
         for zone in zones.all():
             zone_dict = {

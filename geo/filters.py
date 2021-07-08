@@ -29,6 +29,6 @@ class StateFilter(filters.BaseFilterBackend):
         if country_name:
             queryset = queryset.filter(country__name=country_name)
         if zone_name:
-            queryset = queryset.filter(zone__name=country_name)
+            queryset = queryset.filter(zone__name=zone_name)
 
         return queryset.order_by('name')
