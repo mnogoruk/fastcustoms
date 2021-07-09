@@ -4,10 +4,10 @@ from typing import Union
 
 from rest_framework.test import APITestCase
 
-from geo.models import City, Country
+from geo.models import City, Country, Zone
 from goods.models import Good
 from pricing.models import RouteRate, ServiceAdditional, ServiceRanked
-from route.models import HubRoute, RouteTimeTable, AuxiliaryRoute
+from route.models import HubRoute, RouteTimeTable, RouteInPath
 from route.service.calculate import PathService
 from route.service.models import Path
 from route.test.api import TestMapAPI
@@ -24,7 +24,7 @@ class PathServiceTest(APITestCase):
     @classmethod
     def setUpClass(cls):
         PathService.set_map_api_class(TestMapAPI)
-        AuxiliaryRoute.set_map_api_class(TestMapAPI)
+        RouteInPath.set_map_api_class(TestMapAPI)
         super().setUpClass()
 
     @classmethod
@@ -33,6 +33,16 @@ class PathServiceTest(APITestCase):
         cls.country_de = Country.objects.get(name='Germany')
         cls.country_fr = Country.objects.get(name='France')
         cls.country_pl = Country.objects.get(name='Poland')
+
+        cls.zone_ru = Zone.objects.create(name='Russia', slug='Russia', code='ru')
+        cls.zone_de = Zone.objects.create(name='Germany', slug='Germany', code='de')
+        cls.zone_fr = Zone.objects.create(name='France', slug='France', code='fr')
+        cls.zone_pl = Zone.objects.create(name='Poland', slug='Poland', code='pl')
+
+        cls.zone_ru.associate_with_country(cls.country_ru)
+        cls.zone_de.associate_with_country(cls.country_de)
+        cls.zone_fr.associate_with_country(cls.country_fr)
+        cls.zone_pl.associate_with_country(cls.country_pl)
 
         cls.cities_ru = [city for city in
                          City.objects.filter(state__country=cls.country_ru).order_by('?')[:10]]  # sources
@@ -110,29 +120,29 @@ class PathServiceTest(APITestCase):
                 self.directed_routes[0]
             ]),
             Path(routes=[
-                AuxiliaryRoute(source=source, destination=self.directed_routes[1].source),
+                RouteInPath(source=source, destination=self.directed_routes[1].source),
                 self.directed_routes[1],
-                AuxiliaryRoute(source=self.directed_routes[1].destination, destination=destination)
+                RouteInPath(source=self.directed_routes[1].destination, destination=destination)
             ]),
             Path(routes=[
-                AuxiliaryRoute(source=source, destination=self.via_routes[0][0].source),
+                RouteInPath(source=source, destination=self.via_routes[0][0].source),
                 self.via_routes[0][0],
                 self.via_routes[0][1],
-                AuxiliaryRoute(source=self.via_routes[0][1].destination, destination=destination)
+                RouteInPath(source=self.via_routes[0][1].destination, destination=destination)
             ]),
             Path(routes=[
-                AuxiliaryRoute(source=source, destination=self.via_routes[1][0].source),
+                RouteInPath(source=source, destination=self.via_routes[1][0].source),
                 self.via_routes[1][0],
                 self.via_routes[1][1],
-                AuxiliaryRoute(source=self.via_routes[1][1].destination, destination=destination)
+                RouteInPath(source=self.via_routes[1][1].destination, destination=destination)
             ])
         ]
 
     def assertPathRoutesEquals(self, path_origin: Path, path_check: Path, **kwargs):
         self.assertTrue(self.pathRoutesEquals(path_origin, path_check), **kwargs)
 
-    def assertEqualRoute(self, route_origin: Union[HubRoute, AuxiliaryRoute],
-                         route_check: Union[HubRoute, AuxiliaryRoute], **kwargs):
+    def assertEqualRoute(self, route_origin: Union[HubRoute, RouteInPath],
+                         route_check: Union[HubRoute, RouteInPath], **kwargs):
         self.assertTrue(self.routeEquals(route_origin, route_check), **kwargs)
 
     def assertRouteIn(self, route, container, **kwargs):
@@ -155,7 +165,7 @@ class PathServiceTest(APITestCase):
         else:
             return True
 
-    def routeEquals(self, route1: Union[HubRoute, AuxiliaryRoute], route2: Union[HubRoute, AuxiliaryRoute]):
+    def routeEquals(self, route1: Union[HubRoute, RouteInPath], route2: Union[HubRoute, RouteInPath]):
         if type(route1) != type(route2):
             return False
         if route1.source != route2.source:

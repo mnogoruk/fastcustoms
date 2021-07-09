@@ -14,13 +14,13 @@ class ZoneSerializer(serializers.ModelSerializer):
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-        fields = ['id', 'name', 'slug', 'iso2', 'iso3', 'phone_code', 'flag_url', 'zone']
+        fields = ['id', 'name', 'slug', 'iso2', 'iso3', 'phone_code', 'flag_url']
 
 
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
-        fields = ['id', 'name', 'slug', 'code', 'country']
+        fields = ['id', 'name', 'slug', 'code', 'country', 'zone']
 
 
 class CitySerializer(serializers.ModelSerializer):

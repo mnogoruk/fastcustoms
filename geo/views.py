@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from geo.filters import CityFilter
+from geo.filters import CityFilter, StateFilter
 from geo.models import Zone, Country, State, City
 from geo.serializers import ZoneSerializer, CountrySerializer, StateSerializer, CitySerializer, CityShortSerializer
 
@@ -21,6 +21,7 @@ class CountryViewSet(ModelViewSet):
 
 class StateViewSet(ModelViewSet):
     serializer_class = StateSerializer
+    filter_backends = [StateFilter]
     queryset = State.objects.all()
 
 
