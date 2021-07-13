@@ -13,7 +13,7 @@ class HubRouteAdminSerializer(HubRouteSerializer):
     additional_services = ServiceAdditionalSerializer(many=True, required=False)
     ranked_services = ServiceRankedSerializer(many=True, required=False)
     rates = RouteRateSerializer(many=True)
-    timetable = RouteTimeTableSerializer()
+    timetable = RouteTimeTableSerializer(required=False)
 
     def validate_source(self, source):
         try:
