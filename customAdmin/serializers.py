@@ -56,15 +56,17 @@ class HubRouteAdminSerializer(HubRouteSerializer):
         return rates
 
     def create(self, validated_data):
-        rates = validated_data.pop('rates')
-        timetable = validated_data.pop('timetable')
+        rates = validated_data.pop('rates', [])
+        timetable = validated_data.pop('timetable', None)
         additional_services = validated_data.pop('additional_services', [])
         ranked_services = validated_data.pop('ranked_services', [])
 
         with transaction.atomic():
             source = validated_data.pop('source')
             destination = validated_data.pop('destination')
-            timetable = RouteTimeTable.objects.create(**timetable)
+
+            if timetable:
+                timetable = RouteTimeTable.objects.create(**timetable)
 
             route = HubRoute.objects.create(
                 source=source, destination=destination, timetable=timetable, **validated_data
