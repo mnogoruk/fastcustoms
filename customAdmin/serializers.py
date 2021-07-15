@@ -2,11 +2,14 @@ from django.db import transaction
 from rest_framework.serializers import ValidationError, ModelSerializer
 
 from geo.models import City, Zone
+from goods.models import Good
+from order.models import OrderAgent, Special, Order
+from order.serializers import OrderSerializer
 from pricing.models import RouteRate, ZoneRate, ServiceAdditional, ServiceRanked
 from pricing.serializers import ZoneRateSerializer, ServiceRankedSerializer, ServiceAdditionalSerializer, \
     RouteRateSerializer
-from route.models import HubRoute, RouteTimeTable
-from route.serializers import HubRouteSerializer, RouteTimeTableSerializer
+from route.models import HubRoute, RouteTimeTable, Path
+from route.serializers import HubRouteSerializer, RouteTimeTableSerializer, PathSerializer, PathRouteCreatableSerializer
 
 
 class HubRouteAdminSerializer(HubRouteSerializer):
@@ -144,3 +147,21 @@ class ZoneRatesAdminSerializer(ModelSerializer):
     class Meta:
         model = Zone
         fields = '__all__'
+
+
+class PathCreatableSerializer(PathSerializer):
+    routes = PathRouteCreatableSerializer(many=True)
+
+
+class OrderAdminSerializer(OrderSerializer):
+    path = PathCreatableSerializer()
+
+    def create(self, validated_data):
+        agent = OrderAgent.objects.create(**validated_data.pop('agent'))
+        path = Path.creatable.create(**validated_data.pop('path'))
+        good = Good.creatable.create(**validated_data.pop('good'))
+        if 'special' in validated_data:
+            special = Special.objects.create(**validated_data.pop('special'))
+        else:
+            special = Special.objects.create()
+        return Order.objects.create(agent=agent, path=path, good=good, special=special)

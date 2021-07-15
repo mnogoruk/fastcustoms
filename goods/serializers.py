@@ -18,6 +18,9 @@ class ContainerSerializer(serializers.ModelSerializer):
 class GoodSerializer(serializers.ModelSerializer):
     boxes = BoxSerializer(many=True, required=False)
     containers = ContainerSerializer(many=True, required=False)
+    total_volume = serializers.FloatField(read_only=True)
+    total_ldm = serializers.FloatField(read_only=True)
+    total_mass = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Good

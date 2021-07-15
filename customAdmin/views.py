@@ -3,9 +3,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from customAdmin.serializers import HubRouteAdminSerializer, ZoneRatesAdminSerializer
+from customAdmin.serializers import HubRouteAdminSerializer, ZoneRatesAdminSerializer, OrderAdminSerializer
 from geo.models import Zone
 from geo.serializers import ZoneSerializer
+from order.models import Order
 from route.models import HubRoute
 from utils.views.mixins import FullnessMixin
 from route.serializers import HubRouteShortSerializer
@@ -51,3 +52,8 @@ class ZoneRateView(ModelViewSet):
             }
             res.append(zone_dict)
         return Response(data=res)
+
+
+class OrderViewSet(ModelViewSet):
+    serializer_class = OrderAdminSerializer
+    queryset = Order.objects.all()

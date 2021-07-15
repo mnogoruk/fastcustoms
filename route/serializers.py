@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from geo.models import City
 from geo.serializers import CitySerializer, CityShortSerializer
 from goods.models import Box, Container, Good
 from goods.serializers import GoodSerializer
@@ -8,13 +9,33 @@ from utils.calculation import ldm_from_size
 
 from utils.enums import RouteType
 from utils.serializers.fileds import PureLookUpFiled
-from route.models import HubRoute, RouteTimeTable
+from route.models import HubRoute, RouteTimeTable, RouteInPath
 
 
 class RouteTimeTableSerializer(serializers.ModelSerializer):
     class Meta:
         model = RouteTimeTable
         fields = ['weekdays', 'preparation_period']
+
+
+class PathRouteCreatableSerializer(serializers.ModelSerializer):
+    source = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
+    destination = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
+
+    distance = serializers.IntegerField()
+    duration = serializers.IntegerField()
+    is_hub = serializers.BooleanField()
+    type = serializers.ChoiceField(RouteType.choices())
+
+    def validate_source(self, source):
+        return City.objects.get(id=source['id'])
+
+    def validate_destination(self, destination):
+        return City.objects.get(id=destination['id'])
+
+    class Meta:
+        model = RouteInPath
+        exclude = ['id']
 
 
 class PathRouteReadSerializer(serializers.Serializer):
@@ -79,4 +100,3 @@ class PathToCalculateSerializer(serializers.Serializer):
 
     good = GoodSerializer(required=True)
     special = SpecialSerializer(required=False)
-
