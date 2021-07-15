@@ -61,6 +61,9 @@ class Path(models.Model):
     creatable = PathCreatableManager()
     objects = Manager()
 
+    def total_duration(self):
+        return {'min': self.total_duration_min, 'max': self.total_duration_max}
+
 class RouteInPath(AbstractCreate):
 
     API_CLASS = MapAPI()
