@@ -129,22 +129,19 @@ class HubRouteAdminSerializer(HubRouteSerializer):
             new_r_type = validated_data.get('type', RouteType.default().value)
             new_p_type = place_type_related_to_route_type(new_r_type)
 
-            place_counts = HubRoute.objects \
-                .exclude(id=route.id) \
-                .filter(source=route.source, destination=route.destination) \
-                .aggregate(sources_with_types=Count('source',
-                                                    filter=Q(source__types__contained_by=[old_p_type])),
-                           destinations_with_types=Count('destination',
-                                                         filter=Q(destination__types__contained_by=[old_p_type])))
             route.source.add_type(new_p_type)
             route.destination.add_type(new_p_type)
 
-            print(place_counts)
+            if old_p_type != PlaceType.CITY:
 
-            if place_counts['sources_with_types'] == 0:
-                route.source.exclude_type(old_p_type)
-            if place_counts['destinations_with_types'] == 0:
-                route.destination.exclude_type(old_p_type)
+                place_counts = HubRoute.objects.places_count_by_type(source=route.source,
+                                                                     dest=route.destination,
+                                                                     r_type=old_r_type)
+
+                if place_counts['source_count'] <= 1:
+                    route.source.exclude_type(old_p_type)
+                if place_counts['destination_count'] <= 1:
+                    route.destination.exclude_type(old_p_type)
 
             route.source.save()
             route.destination.save()

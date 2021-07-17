@@ -28,7 +28,7 @@ class CityFilter(filters.BaseFilterBackend):
 
         if place_type is None:
             return queryset
-        return queryset.filter(types__contained_by=[place_type])
+        return queryset.filter(types__contains=[place_type])
 
     def filter_queryset(self, request, queryset, view):
         queryset = self.filter_by_geo(request, queryset, view)
