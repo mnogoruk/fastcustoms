@@ -1,8 +1,11 @@
 from rest_framework import filters
 
+from utils.enums import PlaceType
+
 
 class CityFilter(filters.BaseFilterBackend):
-    def filter_queryset(self, request, queryset, view):
+
+    def filter_by_geo(self, request, queryset, view):
         params = request.query_params
 
         state_name = params.get('state')
@@ -16,6 +19,20 @@ class CityFilter(filters.BaseFilterBackend):
         if zone_name:
             queryset = queryset.filter(state__zone__name=zone_name)
 
+        return queryset
+
+    def filter_by_type(self, request, queryset, view):
+        params = request.query_params
+
+        place_type = params.get('type', None)
+
+        if place_type is None:
+            return queryset
+        return queryset.filter(types__contained_by=[place_type])
+
+    def filter_queryset(self, request, queryset, view):
+        queryset = self.filter_by_geo(request, queryset, view)
+        queryset = self.filter_by_type(request, queryset, view)
         return queryset.order_by('name')
 
 

@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Count, Q
 from rest_framework.serializers import ValidationError, ModelSerializer
 
 from geo.models import City, Zone
@@ -10,6 +11,8 @@ from pricing.serializers import ZoneRateSerializer, ServiceRankedSerializer, Ser
     RouteRateSerializer
 from route.models import HubRoute, RouteTimeTable, Path
 from route.serializers import HubRouteSerializer, RouteTimeTableSerializer, PathSerializer, PathRouteCreatableSerializer
+from utils.enums import RouteType, PlaceType
+from utils.functions import place_type_related_to_route_type
 
 
 class HubRouteAdminSerializer(HubRouteSerializer):
@@ -64,9 +67,17 @@ class HubRouteAdminSerializer(HubRouteSerializer):
         additional_services = validated_data.pop('additional_services', [])
         ranked_services = validated_data.pop('ranked_services', [])
 
+        r_type = validated_data.get('type')
+        p_type = place_type_related_to_route_type(r_type)
+
         with transaction.atomic():
             source = validated_data.pop('source')
+            source.add_type(p_type)
+            source.save()
+
             destination = validated_data.pop('destination')
+            destination.add_type(p_type)
+            destination.save()
 
             if timetable:
                 timetable = RouteTimeTable.objects.create(**timetable)
@@ -110,6 +121,33 @@ class HubRouteAdminSerializer(HubRouteSerializer):
             route.ranked_services.all().delete()
             for service in validated_data.pop('ranked_services'):
                 ServiceRanked.objects.create(**service, route=route)
+
+        if route.type != validated_data.get('type', RouteType.default().value):
+            old_r_type = route.type
+            old_p_type = place_type_related_to_route_type(old_r_type)
+
+            new_r_type = validated_data.get('type', RouteType.default().value)
+            new_p_type = place_type_related_to_route_type(new_r_type)
+
+            place_counts = HubRoute.objects \
+                .exclude(id=route.id) \
+                .filter(source=route.source, destination=route.destination) \
+                .aggregate(sources_with_types=Count('source',
+                                                    filter=Q(source__types__contained_by=[old_p_type])),
+                           destinations_with_types=Count('destination',
+                                                         filter=Q(destination__types__contained_by=[old_p_type])))
+            route.source.add_type(new_p_type)
+            route.destination.add_type(new_p_type)
+
+            print(place_counts)
+
+            if place_counts['sources_with_types'] == 0:
+                route.source.exclude_type(old_p_type)
+            if place_counts['destinations_with_types'] == 0:
+                route.destination.exclude_type(old_p_type)
+
+            route.source.save()
+            route.destination.save()
 
         return super(HubRouteAdminSerializer, self).update(route, validated_data)
 

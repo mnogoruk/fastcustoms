@@ -7,6 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from geo.filters import CityFilter, StateFilter
 from geo.models import Zone, Country, State, City
 from geo.serializers import ZoneSerializer, CountrySerializer, StateSerializer, CitySerializer, CityShortSerializer
+from utils.enums import PlaceType
 
 
 class ZoneViewSet(ModelViewSet):

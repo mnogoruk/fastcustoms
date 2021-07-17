@@ -1,11 +1,17 @@
 from django.db import models, transaction
 from dataclasses import dataclass
+from django.contrib.postgres.fields import ArrayField
+
+from utils.enums import PlaceType
 
 
 @dataclass
 class Location:
     latitude: float
     longitude: float
+
+def default_type():
+    return [PlaceType.default().value]
 
 
 class Country(models.Model):
@@ -37,6 +43,7 @@ class Zone(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+
 class State(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=100, unique=True)
@@ -55,7 +62,20 @@ class City(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
 
+    types = ArrayField(
+        models.CharField(max_length=20, choices=PlaceType.choices()),
+        size=6,
+        default=default_type)
+
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, related_name='cities')
+
+    def add_type(self, place_type: PlaceType):
+        if place_type.value not in self.types:
+            self.types.append(place_type.value)
+
+    def exclude_type(self, place_type: PlaceType):
+        if place_type.value in self.types:
+            self.types.remove(place_type.value)
 
     @property
     def location(self):
