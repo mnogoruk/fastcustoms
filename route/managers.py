@@ -1,7 +1,8 @@
 from django.db import transaction
-from django.db.models import Manager, Sum
+from django.db.models import Manager, Sum, Count, Q
 
-from geo.models import Zone, Country
+from geo.models import Zone, Country, City
+from utils.enums import PlaceType, RouteType
 
 
 class HubRouteManager(Manager):
@@ -20,6 +21,18 @@ class HubRouteManager(Manager):
 
     def with_additional_services_cost(self):
         return self.annotate(additional_services_cost=Sum('additional_services__price'))
+
+    def routes_related_to_city(self, city: City):
+        return self.filter(source=city).union(self.filter(destionation=city))
+
+    def places_count_by_type(self, source: City, dest: City, r_type: str):
+        qss = self.filter(source=source, type=r_type)\
+            .union(
+            self.filter(destination=source, type=r_type))
+        qsd = self.filter(source=dest, type=r_type)\
+            .union(
+            self.filter(destination=dest, type=r_type))
+        return {'source_count': qss.count(), 'destination_count': qsd.count()}
 
 
 class PathCreatableManager(Manager):

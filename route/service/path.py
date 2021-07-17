@@ -2,9 +2,18 @@ from geo.models import City
 from order.models import Special
 from route.service.calculate import PathService
 from route.service.models import PathConclusion, Box, Container, Good
+from utils.enums import PlaceType
 
 
 class PathCalculator:
+
+    def __init__(self, **data):
+        self.source = self.get_place(data.pop('source', {}).pop('id'))
+        self.destination = self.get_place(data.pop('destination', {}).pop('id'))
+        self.source_type = data.pop('source_type', PlaceType.default().value)
+        self.destination_type = data.pop('destination_type', PlaceType.default().value)
+        self.good = self.built_good(good_data=data.pop('good', {}))
+        self.special = self.build_special(special_data=data.pop('special', {}))
 
     @classmethod
     def built_good(cls, good_data):
@@ -44,14 +53,8 @@ class PathCalculator:
             'state__zone',
         ).get(id=place_id)
 
-    def __init__(self, **data):
-        self.source = self.get_place(data.pop('source', {}).pop('id'))
-        self.destination = self.get_place(data.pop('destination', {}).pop('id'))
-        self.good = self.built_good(good_data=data.pop('good', {}))
-        self.special = self.build_special(special_data=data.pop('special', {}))
-
     def get_path_conclusion(self):
-        paths = PathService.paths(self.source, self.destination)
+        paths = PathService.paths(self.source, self.destination, self.source_type, self.destination_type)
 
         for path in paths:
             PathService.calculate(path, self.good, self.special)

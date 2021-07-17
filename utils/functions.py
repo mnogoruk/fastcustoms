@@ -1,3 +1,6 @@
+from utils.enums import RouteType, PlaceType
+
+
 def circle_search(array: list, index_from: int = 0, search_value=1):
     try:
         ind = array.index(search_value, index_from)
@@ -10,3 +13,14 @@ def circle_search(array: list, index_from: int = 0, search_value=1):
         return len(array) - index_from + ind
 
 
+def place_type_related_to_route_type(r_type):
+    if r_type == RouteType.AIR.value:
+        p_type = PlaceType.AIRPORT
+    elif r_type == RouteType.TRAIN.value:
+        p_type = PlaceType.RAILWAY_STATION
+    elif r_type == RouteType.TRUCK.value:
+        p_type = PlaceType.CITY
+    else:
+        p_type = PlaceType.default()
+
+    return p_type
