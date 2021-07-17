@@ -59,3 +59,8 @@ class ServiceRanked(AbstractCreate):
 
     def __str__(self):
         return f"{self.route}: {self.name}"
+
+
+class ZonePricingInfo(models.Model):
+    zone = models.OneToOneField(Zone, on_delete=models.CASCADE, related_name='pricing_info')
+    minimal_distance = models.IntegerField(default=0)
