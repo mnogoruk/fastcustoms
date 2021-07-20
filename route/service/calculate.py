@@ -117,7 +117,7 @@ class PathService:
 
     @classmethod
     def calculate(cls, path: Union[dataclass.Path, models.Path], good: Good, special: Special = Special()):
-
+        print("CALCULATE")
         total_cost = 0
         total_duration = PathDuration(1, 1)
         total_distance = 0
@@ -137,13 +137,15 @@ class PathService:
             raise ValueError(
                 f"path must be route.service.models.Path or route.models.Path instance. Got {type(path)} instead"
             )
-
+        print('calculate routes')
         for route in routes:
-
+            print('\troute: ', route)
             if route.is_hub:
                 cost = cls.cost_of_hub_route(route, good)
+                print('\thub route cost: ', cost)
             else:
                 cost = cls.cost_of_auxiliary_route(route, good)
+                print('\tauxiliary route cost: ', cost)
 
             total_cost += cost
             total_distance += route.distance
@@ -190,7 +192,11 @@ class PathService:
     def cost_of_hub_route(cls, route: HubRoute, good: Good):
 
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good)
+        print('\t\tcost_ldm: ', cost_ldm)
+        print('\t\tcost_size: ', cost_size)
+        print('\t\tcost_mass: ', cost_mass)
         cost_service = cls.cost_by_services(route, good)
+        print('\t\tcost_service: ', cost_service)
 
         return max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
 
