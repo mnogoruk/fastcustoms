@@ -22,7 +22,10 @@ class Country(models.Model):
     phone_code = models.CharField(max_length=20, null=True)
     flag_url = models.URLField(null=True)
 
-    capital = models.OneToOneField('City', on_delete=models.SET_NULL, null=True)
+    alias_en = models.CharField(max_length=200, null=True, default=None)
+    alias_ru = models.CharField(max_length=200, null=True, default=None)
+
+    capital = models.OneToOneField('City', on_delete=models.SET_NULL, null=True, related_name='country_as_capital')
 
     def __str__(self):
         return f"{self.name}"
@@ -49,6 +52,9 @@ class State(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     code = models.CharField(max_length=50, null=True)
 
+    alias_en = models.CharField(max_length=200, null=True, default=None)
+    alias_ru = models.CharField(max_length=200, null=True, default=None)
+
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, related_name='states')
     zone = models.ForeignKey(Zone, on_delete=models.SET_NULL, null=True, related_name='states')
 
@@ -61,6 +67,9 @@ class City(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True, default=None, )
+    alias_en = models.CharField(max_length=200, null=True, default=None)
+    alias_ru = models.CharField(max_length=200, null=True, default=None)
 
     types = ArrayField(
         models.CharField(max_length=20, choices=PlaceType.choices()),

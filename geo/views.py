@@ -19,6 +19,15 @@ class CountryViewSet(ModelViewSet):
     serializer_class = CountrySerializer
     queryset = Country.objects.all()
 
+    def get_serializer(self, *args, **kwargs):
+        params = self.request.query_params
+        alias = params.get('alias', [])
+
+        if isinstance(alias, str):
+            alias = alias.split(',')
+        serializer_class = self.get_serializer_class()
+        kwargs.setdefault('context', self.get_serializer_context())
+        return serializer_class(*args, alias=alias, **kwargs)
 
 class StateViewSet(ModelViewSet):
     serializer_class = StateSerializer
@@ -31,14 +40,32 @@ class CityViewSet(ModelViewSet):
     filter_backends = [CityFilter]
     queryset = City.objects.all()
 
+    def get_serializer(self, *args, **kwargs):
+        params = self.request.query_params
+        alias = params.get('alias', [])
+
+        if isinstance(alias, str):
+            alias = alias.split(',')
+        serializer_class = self.get_serializer_class()
+        kwargs.setdefault('context', self.get_serializer_context())
+        return serializer_class(*args, alias=alias, **kwargs)
+
     @action(detail=False, methods=['get'], name='short', url_name='short', url_path='short')
     def list_short(self, request):
-        queryset = self.filter_queryset(City.objects.values('name', 'id', 'state_id'))
+        # deprecated
+        params = self.request.query_params
+        alias = params.get('alias', [])
+        if isinstance(alias, str):
+            alias = alias.split(',')
+
+        serializer_class = CityShortSerializer
+
+        queryset = self.filter_queryset(City.objects.values('name', 'id', 'state_id', *serializer_class.alias_fields()))
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = CityShortSerializer(queryset, many=True)
+            serializer = serializer_class(queryset, alias=alias, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = CityShortSerializer(queryset, many=True)
+        serializer = serializer_class(queryset, alias=alias, many=True)
         return Response(serializer.data)
