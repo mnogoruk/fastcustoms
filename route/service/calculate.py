@@ -1,5 +1,5 @@
 import datetime
-from typing import Union
+from typing import Union, List
 
 from django.db import connection
 from django.db.models import Sum
@@ -40,8 +40,22 @@ class PathService:
         destination_route_data = cls.API_CLASS.distance_duration(hub_destinations, [dest])
 
         # combine all it
-        return cls.build_paths(source_route_data, destination_route_data, hub_routes, source, dest, source_type,
-                               destination_type)
+        paths = cls.build_paths(source_route_data, destination_route_data, hub_routes, source, dest, source_type,
+                                destination_type)
+        return cls.excluded_circles(paths)
+
+    @classmethod
+    def excluded_circles(cls, paths: List[dataclass.Path]):
+        correct_paths = []
+        for i, path in enumerate(paths):
+            sources = []
+            for route in path.routes:
+                if route.destination in sources:
+                    break
+                sources.append(route.source)
+            else:
+                correct_paths.append(path)
+        return correct_paths
 
     @classmethod
     def build_paths(cls,

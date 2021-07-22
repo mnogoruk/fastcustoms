@@ -74,4 +74,5 @@ class PathCalculator:
             print('path: ', path)
             PathService.calculate(path, self.good, self.special)
 
+
         return PathConclusion(source=self.source, destination=self.destination, paths=paths)
