@@ -200,8 +200,3 @@ class OrderAdminSerializer(OrderSerializer):
         else:
             special = Special.objects.create()
         return Order.objects.create(agent=agent, path=path, good=good, special=special)
-
-
-class ZoneStatePairSerializer(Serializer):
-    zone = PrimaryKeyRelatedField(queryset=Zone.objects.all())
-    state = PrimaryKeyRelatedField(queryset=State.objects.all())

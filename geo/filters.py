@@ -31,6 +31,14 @@ class StateFilter(filters.BaseFilterBackend):
         country_name = params.get('country')
         zone_name = params.get('zone')
 
+        empty = params.get('empty')
+        if empty in ('on', 'True', '', True):
+            empty = True
+        else:
+            empty = False
+        if empty:
+            return queryset.filter(zone__isnull=True).order_by('name')
+
         if country_name:
             queryset = queryset.filter(country__name=country_name)
         if zone_name:
