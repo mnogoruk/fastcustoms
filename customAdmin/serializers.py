@@ -1,8 +1,8 @@
 from django.db import transaction
 from django.db.models import Count, Q
-from rest_framework.serializers import ValidationError, ModelSerializer
+from rest_framework.serializers import ValidationError, ModelSerializer, Serializer, PrimaryKeyRelatedField
 
-from geo.models import City, Zone
+from geo.models import City, Zone, State
 from goods.models import Good
 from order.models import OrderAgent, Special, Order
 from order.serializers import OrderSerializer
@@ -200,3 +200,8 @@ class OrderAdminSerializer(OrderSerializer):
         else:
             special = Special.objects.create()
         return Order.objects.create(agent=agent, path=path, good=good, special=special)
+
+
+class ZoneStatePairSerializer(Serializer):
+    zone = PrimaryKeyRelatedField(queryset=Zone.objects.all())
+    state = PrimaryKeyRelatedField(queryset=State.objects.all())

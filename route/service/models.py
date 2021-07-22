@@ -9,14 +9,14 @@ from utils.calculation import ldm_from_size
 
 @dataclass
 class PathDuration:
-    min: int
-    max: int
+    min: float  # days
+    max: float  # days
 
 
 @dataclass
 class Path:
-    total_distance: int = 0  # meters
-    total_duration: PathDuration = PathDuration(0, 0)  # minutes
+    total_distance: float = 0  # km
+    total_duration: PathDuration = PathDuration(0, 0)  # pair in days
     total_cost: float = 0  # euro
 
     routes: List[Union[HubRoute, RouteInPath]] = field(default_factory=list)
@@ -32,11 +32,11 @@ class PathConclusion:
 
 @dataclass
 class Box:
-    length: float
-    width: float
-    height: float
+    length: float  # meters
+    width: float  # meters
+    height: float  # meters
 
-    mass: float
+    mass: float  # kg
     amount: int
     type: str
 
@@ -60,9 +60,9 @@ class Good:
     boxes: List[Box]
     containers: List[Container]
 
-    total_volume: float = 0
-    total_ldm: float = 0
-    total_mass: float = 0
+    total_volume: float = 0  # meters codes
+    total_ldm: float = 0  # ldm
+    total_mass: float = 0  # kg
 
     def recalculate_params(self):
         params = boxes_summary(self.boxes)
@@ -73,6 +73,7 @@ class Good:
     def add_box(self, box):
         self.boxes.append(box)
         self.recalculate_params()
+
 
 @dataclass
 class Special:

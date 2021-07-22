@@ -1,9 +1,7 @@
 from rest_framework import serializers
 
-from goods.models import Good
 from goods.serializers import GoodSerializer
 from order.models import OrderAgent, Order, Special
-from route.models import Path
 from route.serializers import PathSerializer
 
 

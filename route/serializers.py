@@ -2,10 +2,8 @@ from rest_framework import serializers
 
 from geo.models import City
 from geo.serializers import CitySerializer, CityShortSerializer
-from goods.models import Box, Container, Good
 from goods.serializers import GoodSerializer
 from order.models import Special
-from utils.calculation import ldm_from_size
 
 from utils.enums import RouteType, PlaceType
 from utils.serializers.fileds import PureLookUpFiled
@@ -22,8 +20,8 @@ class PathRouteCreatableSerializer(serializers.ModelSerializer):
     source = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
     destination = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
 
-    distance = serializers.IntegerField()
-    duration = serializers.IntegerField()
+    distance = serializers.FloatField()  # km
+    duration = serializers.FloatField()  # days
     is_hub = serializers.BooleanField()
     type = serializers.ChoiceField(RouteType.choices())
 
@@ -42,8 +40,8 @@ class PathRouteReadSerializer(serializers.Serializer):
     source = CitySerializer(read_only=True)
     destination = CitySerializer(read_only=True)
 
-    distance = serializers.IntegerField(read_only=True)
-    duration = serializers.IntegerField(read_only=True)
+    distance = serializers.FloatField(read_only=True)  # km
+    duration = serializers.FloatField(read_only=True)  # days
     is_hub = serializers.BooleanField(read_only=True)
     type = serializers.ChoiceField(RouteType.choices(), read_only=True)
 
@@ -67,13 +65,13 @@ class HubRouteShortSerializer(serializers.ModelSerializer):
 
 
 class DurationSerializer(serializers.Serializer):
-    min = serializers.IntegerField()
-    max = serializers.IntegerField()
+    min = serializers.FloatField()  # days
+    max = serializers.FloatField()  # days
 
 
 class PathSerializer(serializers.Serializer):
-    total_distance = serializers.IntegerField()
-    total_duration = DurationSerializer()
+    total_distance = serializers.FloatField()  # km
+    total_duration = DurationSerializer()  # pair in days
     total_cost = serializers.DecimalField(max_digits=12, decimal_places=2)
 
     routes = PathRouteReadSerializer(many=True)
