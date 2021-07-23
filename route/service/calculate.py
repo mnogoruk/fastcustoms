@@ -165,10 +165,8 @@ class PathService:
             total_distance += route.distance
 
             if route.is_hub:
-                duration_best = (route.duration_from_department(departure_date_best) // 60 + 23) // 24
-                duration_worst = (route.duration_from_department(
-                    departure_date_worst + datetime.timedelta(days=1)) // 60 + 23) // 24 + 1
-
+                duration_best = route.duration_from_department(departure_date_best)
+                duration_worst = route.duration_from_department(departure_date_worst + datetime.timedelta(days=1))
                 total_duration.min += duration_best
                 total_duration.max += duration_worst
 
@@ -176,8 +174,8 @@ class PathService:
                 departure_date_worst += datetime.timedelta(days=duration_worst)
 
             else:
-                total_duration.min += (route.duration // 60 + 23) // 24
-                total_duration.max += (route.duration // 60 + 23) // 24 + 1
+                total_duration.min += route.duration
+                total_duration.max += route.duration + 1
 
         path.total_duration = total_duration
         path.total_distance = total_distance

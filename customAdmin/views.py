@@ -2,8 +2,11 @@ from django.db.models import Count, F
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK
+
+from common.models import Customs
 from customAdmin.serializers import HubRouteAdminSerializer, ZoneRatesAdminSerializer, OrderAdminSerializer
 from geo.models import Zone, State
 from geo.serializers import ZoneSerializer
@@ -94,7 +97,22 @@ class ZoneViewSet(ModelViewSet):
         state.save()
         return Response(data={'status': '200'}, status=HTTP_200_OK)
 
+
 class OrderViewSet(ModelViewSet):
     # permission_classes = (IsAuthenticated,)
     serializer_class = OrderAdminSerializer
     queryset = Order.objects.all()
+
+
+class CustomsEditView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        try:
+            text = request.data['text']
+        except KeyError:
+            return Response(data={'text': 'text is required'}, status=HTTP_400_BAD_REQUEST)
+
+        c = Customs.get()
+        c.text = text
+        c.save()
+        return Response(data={'status': 'success'}, status=HTTP_200_OK)

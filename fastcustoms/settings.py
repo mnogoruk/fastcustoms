@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'pricing',
     'goods',
     'order',
-    'customAdmin'
+    'customAdmin',
+    'common'
 ]
 CACHES = {
     'default': {
