@@ -1,7 +1,7 @@
 from rest_framework.routers import SimpleRouter
 from rest_framework_simplejwt import views as jwt_views
 from django.urls import path
-from .views import RouteView, ZoneViewSet, OrderViewSet, CustomsEditView
+from .views import RouteView, ZoneViewSet, OrderViewSet, CustomsEditView, ZoneCreateView
 
 router = SimpleRouter()
 router.register('admin-routes', RouteView)
@@ -16,4 +16,7 @@ urlpatterns.append(
 )
 urlpatterns.append(
     path('customs/', CustomsEditView.as_view(), name='edit-customs')
+)
+urlpatterns.append(
+    path('zones/create/', ZoneCreateView.as_view(), name='zone-create')
 )

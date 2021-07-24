@@ -1,8 +1,12 @@
+import string
+from random import choice
+
 from django.db import transaction
 from django.db.models import Count, Q
 from rest_framework.serializers import ValidationError, ModelSerializer, Serializer, PrimaryKeyRelatedField
 
 from geo.models import City, Zone, State
+from geo.serializers import ZoneShortSerializer
 from goods.models import Good
 from order.models import OrderAgent, Special, Order
 from order.serializers import OrderSerializer
@@ -200,3 +204,11 @@ class OrderAdminSerializer(OrderSerializer):
         else:
             special = Special.objects.create()
         return Order.objects.create(agent=agent, path=path, good=good, special=special)
+
+
+class ZoneCreateSerializer(ZoneShortSerializer):
+    def create(self, validated_data):
+        name = validated_data['name']
+        slug = name + ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(6))
+        validated_data['slug'] = slug
+        return super(ZoneCreateSerializer, self).create(validated_data)
