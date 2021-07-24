@@ -99,6 +99,5 @@ class PathToCalculateSerializer(serializers.Serializer):
 
     good = GoodSerializer(required=True)
     special = SpecialSerializer(required=False)
-
     source_type = serializers.ChoiceField(choices=PlaceType.choices(), default=PlaceType.CITY.value)
     destination_type = serializers.ChoiceField(choices=PlaceType.choices(), default=PlaceType.CITY.value)
