@@ -10,7 +10,7 @@ from geo.serializers import ZoneShortSerializer
 from goods.models import Good
 from order.models import OrderAgent, Special, Order
 from order.serializers import OrderSerializer
-from pricing.models import RouteRate, ZoneRate, ServiceAdditional, ServiceRanked
+from pricing.models import RouteRate, ZoneRate, ServiceAdditional, ServiceRanked, ZonePricingInfo
 from pricing.serializers import ZoneRateSerializer, ServiceRankedSerializer, ServiceAdditionalSerializer, \
     RouteRateSerializer
 from route.models import HubRoute, RouteTimeTable, Path
@@ -211,4 +211,6 @@ class ZoneCreateSerializer(ZoneShortSerializer):
         name = validated_data['name']
         slug = name + ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(6))
         validated_data['slug'] = slug
-        return super(ZoneCreateSerializer, self).create(validated_data)
+        zone = super(ZoneCreateSerializer, self).create(validated_data)
+        ZonePricingInfo.objects.create(zone=zone, minimal_distance=10)
+        return zone
