@@ -1,14 +1,22 @@
 from rest_framework import serializers
 
+<<<<<<< HEAD
 
+=======
+from geo.models import City
+>>>>>>> master
 from geo.serializers import CitySerializer, CityShortSerializer
-from goods.models import Box, Container, Good
 from goods.serializers import GoodSerializer
 from order.models import Special
+<<<<<<< HEAD
 from utils.calculation import ldm_from_size
 from utils.enums import RouteType
+=======
+
+from utils.enums import RouteType, PlaceType
+>>>>>>> master
 from utils.serializers.fileds import PureLookUpFiled
-from route.models import HubRoute, RouteTimeTable
+from route.models import HubRoute, RouteTimeTable, RouteInPath
 
 
 class RouteTimeTableSerializer(serializers.ModelSerializer):
@@ -17,12 +25,32 @@ class RouteTimeTableSerializer(serializers.ModelSerializer):
         fields = ['weekdays', 'preparation_period']
 
 
+class PathRouteCreatableSerializer(serializers.ModelSerializer):
+    source = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
+    destination = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
+
+    distance = serializers.FloatField()  # km
+    duration = serializers.FloatField()  # days
+    is_hub = serializers.BooleanField()
+    type = serializers.ChoiceField(RouteType.choices())
+
+    def validate_source(self, source):
+        return City.objects.get(id=source['id'])
+
+    def validate_destination(self, destination):
+        return City.objects.get(id=destination['id'])
+
+    class Meta:
+        model = RouteInPath
+        exclude = ['id']
+
+
 class PathRouteReadSerializer(serializers.Serializer):
     source = CitySerializer(read_only=True)
     destination = CitySerializer(read_only=True)
 
-    distance = serializers.IntegerField(read_only=True)
-    duration = serializers.IntegerField(read_only=True)
+    distance = serializers.FloatField(read_only=True)  # km
+    duration = serializers.FloatField(read_only=True)  # days
     is_hub = serializers.BooleanField(read_only=True)
     type = serializers.ChoiceField(RouteType.choices(), read_only=True)
 
@@ -46,13 +74,13 @@ class HubRouteShortSerializer(serializers.ModelSerializer):
 
 
 class DurationSerializer(serializers.Serializer):
-    min = serializers.IntegerField()
-    max = serializers.IntegerField()
+    min = serializers.FloatField()  # days
+    max = serializers.FloatField()  # days
 
 
 class PathSerializer(serializers.Serializer):
-    total_distance = serializers.IntegerField()
-    total_duration = DurationSerializer()
+    total_distance = serializers.FloatField()  # km
+    total_duration = DurationSerializer()  # pair in days
     total_cost = serializers.DecimalField(max_digits=12, decimal_places=2)
 
     routes = PathRouteReadSerializer(many=True)
@@ -79,3 +107,8 @@ class PathToCalculateSerializer(serializers.Serializer):
 
     good = GoodSerializer(required=True)
     special = SpecialSerializer(required=False)
+<<<<<<< HEAD
+=======
+    source_type = serializers.ChoiceField(choices=PlaceType.choices(), default=PlaceType.CITY.value)
+    destination_type = serializers.ChoiceField(choices=PlaceType.choices(), default=PlaceType.CITY.value)
+>>>>>>> master

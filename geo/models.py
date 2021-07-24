@@ -1,11 +1,17 @@
 from django.db import models, transaction
 from dataclasses import dataclass
+from django.contrib.postgres.fields import ArrayField
+
+from utils.enums import PlaceType
 
 
 @dataclass
 class Location:
     latitude: float
     longitude: float
+
+def default_type():
+    return [PlaceType.default().value]
 
 
 class Country(models.Model):
@@ -16,7 +22,10 @@ class Country(models.Model):
     phone_code = models.CharField(max_length=20, null=True)
     flag_url = models.URLField(null=True)
 
-    capital = models.OneToOneField('City', on_delete=models.SET_NULL, null=True)
+    alias_en = models.CharField(max_length=200, null=True, default=None)
+    alias_ru = models.CharField(max_length=200, null=True, default=None)
+
+    capital = models.OneToOneField('City', on_delete=models.SET_NULL, null=True, related_name='country_as_capital')
 
     def __str__(self):
         return f"{self.name}"
@@ -37,10 +46,14 @@ class Zone(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+
 class State(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=100, unique=True)
     code = models.CharField(max_length=50, null=True)
+
+    alias_en = models.CharField(max_length=200, null=True, default=None)
+    alias_ru = models.CharField(max_length=200, null=True, default=None)
 
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, related_name='states')
     zone = models.ForeignKey(Zone, on_delete=models.SET_NULL, null=True, related_name='states')
@@ -54,8 +67,24 @@ class City(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True, default=None, )
+    alias_en = models.CharField(max_length=200, null=True, default=None)
+    alias_ru = models.CharField(max_length=200, null=True, default=None)
+
+    types = ArrayField(
+        models.CharField(max_length=20, choices=PlaceType.choices()),
+        size=6,
+        default=default_type)
 
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, related_name='cities')
+
+    def add_type(self, place_type: PlaceType):
+        if place_type.value not in self.types:
+            self.types.append(place_type.value)
+
+    def exclude_type(self, place_type: PlaceType):
+        if place_type.value in self.types:
+            self.types.remove(place_type.value)
 
     @property
     def location(self):

@@ -5,9 +5,8 @@ from goods.models import Good
 from route.models import Path
 
 
-class OrderUnit(models.Model):
+class OrderAgent(models.Model):
     company_name = models.CharField(max_length=250)
-    index = models.CharField(max_length=50)
     address = models.CharField(max_length=500)
     contact_person = models.CharField(max_length=250)
     phone = models.CharField(max_length=50)
@@ -15,13 +14,14 @@ class OrderUnit(models.Model):
 
 
 class Special(models.Model):
-    departure_date = models.DateField()
+    departure_date = models.DateField(null=True)
+
 
 class Order(models.Model):
-    shipper = models.OneToOneField(OrderUnit, on_delete=models.CASCADE, related_name='order_by_shipper')
-    consignee = models.OneToOneField(OrderUnit, on_delete=models.CASCADE, related_name='order_by_consignee')
+    agent = models.OneToOneField(OrderAgent, on_delete=models.CASCADE, related_name='order', null=True, default=None)
 
     path = models.OneToOneField(Path, on_delete=models.CASCADE, related_name='order')
     good = models.OneToOneField(Good, on_delete=models.CASCADE, related_name='order')
-    special = models.OneToOneField(Special, on_delete=models.CASCADE, related_name='order')
-    time_stamp = models.DateTimeField(auto_created=True)
+    special = models.OneToOneField(Special, on_delete=models.CASCADE, related_name='order', null=True)
+    time_stamp = models.DateTimeField(auto_created=True, auto_now_add=True)
+    customs = models.BooleanField(default=False)

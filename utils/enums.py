@@ -17,6 +17,16 @@ class RouteType(SelectableMixin, Enum):
     def default(cls):
         return cls.TRUCK
 
+class PlaceType(SelectableMixin, Enum):
+    CITY = 'CITY'
+    AIRPORT = 'AIRPORT'
+    RAILWAY_STATION = 'RAILWAY_STATION'
+    SEAPORT = 'SEAPORT'
+
+    @classmethod
+    def default(cls):
+        return cls.CITY
+
 
 class BoxType(SelectableMixin, Enum):
     BOX = 'BOX'

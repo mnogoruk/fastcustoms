@@ -32,37 +32,41 @@ class HubRoute(AbstractCreate):
 
     timetable = models.OneToOneField(RouteTimeTable, on_delete=models.SET_NULL, null=True)
 
-    distance = models.IntegerField()
-    duration = models.IntegerField()
+    distance = models.FloatField()  # km
+    duration = models.FloatField()  # days
 
     is_hub = True
 
     objects = HubRouteManager()
 
     def duration_from_department(self, department_date):
+        # days
         if self.timetable is None:
             return self.duration
 
         date_ready = department_date + datetime.timedelta(days=self.timetable.preparation_period)
         weekdays = self.timetable.weekdays
         num_days = circle_search(weekdays, date_ready.weekday(), 1)
-        return num_days * 24 * 60 + self.duration
+        return num_days + self.duration
 
     def __str__(self):
         return f"{self.source} - {self.destination}"
 
 
 class Path(models.Model):
-    total_distance = models.IntegerField(default=0)
-    total_duration_min = models.IntegerField(default=0)
-    total_duration_max = models.IntegerField(default=0)
+    total_distance = models.FloatField(default=0)  # km
+    total_duration_min = models.FloatField(default=0)  # days
+    total_duration_max = models.FloatField(default=0)  # days
     total_cost = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
     creatable = PathCreatableManager()
     objects = Manager()
 
-class RouteInPath(AbstractCreate):
+    def total_duration(self):
+        return {'min': self.total_duration_min, 'max': self.total_duration_max}
 
+
+class RouteInPath(AbstractCreate):
     API_CLASS = MapAPI()
 
     source = models.ForeignKey(City, on_delete=models.CASCADE, related_name='path_routes_as_source')
@@ -71,8 +75,8 @@ class RouteInPath(AbstractCreate):
 
     path = models.ForeignKey(Path, on_delete=models.CASCADE, related_name='routes', null=True)
 
-    _distance = models.IntegerField(null=True)
-    _duration = models.IntegerField(null=True)
+    _distance = models.FloatField(null=True)  # km
+    _duration = models.FloatField(null=True)  # days
 
     is_hub = models.BooleanField()
 

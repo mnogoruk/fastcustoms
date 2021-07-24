@@ -26,11 +26,11 @@ class Good(models.Model):
 
 class Box(models.Model):
     # dimensions
-    length = models.FloatField()
-    width = models.FloatField()
-    height = models.FloatField()
+    length = models.FloatField()  # meters
+    width = models.FloatField()  # meters
+    height = models.FloatField()  # meters
 
-    mass = models.FloatField()
+    mass = models.FloatField()  # kg
     amount = models.IntegerField()
 
     type = models.CharField(max_length=20, default=BoxType.BOX.value, choices=BoxType.choices())
@@ -39,10 +39,12 @@ class Box(models.Model):
 
     @property
     def volume(self):
+        # meters cubes
         return self.length * self.width * self.height * self.amount
 
     @property
     def ldm(self):
+        # ldm
         return ldm_from_size(length=self.length, width=self.width, height=self.height) * self.amount
 
 
@@ -51,4 +53,3 @@ class Container(models.Model):
     amount = models.IntegerField()
 
     good = models.ForeignKey(Good, on_delete=models.CASCADE, related_name='containers')
-

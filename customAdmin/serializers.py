@@ -1,12 +1,18 @@
 from django.db import transaction
-from rest_framework.serializers import ValidationError, ModelSerializer
+from django.db.models import Count, Q
+from rest_framework.serializers import ValidationError, ModelSerializer, Serializer, PrimaryKeyRelatedField
 
-from geo.models import City, Zone
+from geo.models import City, Zone, State
+from goods.models import Good
+from order.models import OrderAgent, Special, Order
+from order.serializers import OrderSerializer
 from pricing.models import RouteRate, ZoneRate, ServiceAdditional, ServiceRanked
 from pricing.serializers import ZoneRateSerializer, ServiceRankedSerializer, ServiceAdditionalSerializer, \
     RouteRateSerializer
-from route.models import HubRoute, RouteTimeTable
-from route.serializers import HubRouteSerializer, RouteTimeTableSerializer
+from route.models import HubRoute, RouteTimeTable, Path
+from route.serializers import HubRouteSerializer, RouteTimeTableSerializer, PathSerializer, PathRouteCreatableSerializer
+from utils.enums import RouteType, PlaceType
+from utils.functions import place_type_related_to_route_type
 
 
 class HubRouteAdminSerializer(HubRouteSerializer):
@@ -61,9 +67,17 @@ class HubRouteAdminSerializer(HubRouteSerializer):
         additional_services = validated_data.pop('additional_services', [])
         ranked_services = validated_data.pop('ranked_services', [])
 
+        r_type = validated_data.get('type')
+        p_type = place_type_related_to_route_type(r_type)
+
         with transaction.atomic():
             source = validated_data.pop('source')
+            source.add_type(p_type)
+            source.save()
+
             destination = validated_data.pop('destination')
+            destination.add_type(p_type)
+            destination.save()
 
             if timetable:
                 timetable = RouteTimeTable.objects.create(**timetable)
@@ -108,6 +122,30 @@ class HubRouteAdminSerializer(HubRouteSerializer):
             for service in validated_data.pop('ranked_services'):
                 ServiceRanked.objects.create(**service, route=route)
 
+        if route.type != validated_data.get('type', RouteType.default().value):
+            old_r_type = route.type
+            old_p_type = place_type_related_to_route_type(old_r_type)
+
+            new_r_type = validated_data.get('type', RouteType.default().value)
+            new_p_type = place_type_related_to_route_type(new_r_type)
+
+            route.source.add_type(new_p_type)
+            route.destination.add_type(new_p_type)
+
+            if old_p_type != PlaceType.CITY:
+
+                place_counts = HubRoute.objects.places_count_by_type(source=route.source,
+                                                                     dest=route.destination,
+                                                                     r_type=old_r_type)
+
+                if place_counts['source_count'] <= 1:
+                    route.source.exclude_type(old_p_type)
+                if place_counts['destination_count'] <= 1:
+                    route.destination.exclude_type(old_p_type)
+
+            route.source.save()
+            route.destination.save()
+
         return super(HubRouteAdminSerializer, self).update(route, validated_data)
 
     class Meta:
@@ -144,3 +182,21 @@ class ZoneRatesAdminSerializer(ModelSerializer):
     class Meta:
         model = Zone
         fields = '__all__'
+
+
+class PathCreatableSerializer(PathSerializer):
+    routes = PathRouteCreatableSerializer(many=True)
+
+
+class OrderAdminSerializer(OrderSerializer):
+    path = PathCreatableSerializer()
+
+    def create(self, validated_data):
+        agent = OrderAgent.objects.create(**validated_data.pop('agent'))
+        path = Path.creatable.create(**validated_data.pop('path'))
+        good = Good.creatable.create(**validated_data.pop('good'))
+        if 'special' in validated_data:
+            special = Special.objects.create(**validated_data.pop('special'))
+        else:
+            special = Special.objects.create()
+        return Order.objects.create(agent=agent, path=path, good=good, special=special)

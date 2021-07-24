@@ -1,5 +1,5 @@
 import datetime
-from typing import Union
+from typing import Union, List
 
 from django.db import connection
 from django.db.models import Sum
@@ -10,7 +10,7 @@ from route.models import HubRoute, RouteInPath
 from route.service import models as dataclass
 from route.service.models import PathDuration, Good, Special
 from route.service.raw_queries import ROUTES_VIA_WAYPOINT_ZONE_QUERY
-from utils.enums import RouteType, RateType
+from utils.enums import RouteType, RateType, PlaceType
 from route import models
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -23,10 +23,10 @@ class PathService:
         cls.API_CLASS = api_class
 
     @classmethod
-    def paths(cls, source: City, dest: City) -> list:
+    def paths(cls, source: City, dest: City, source_type, destination_type) -> list:
 
         # better if source and dest objects all have prefetched zone instance
-        hub_routes = cls.hub_routes_by_zone(source.state.zone, dest.state.zone)
+        hub_routes = cls.hub_routes_by_zone(source.state.zone, dest.state.zone, source_type, destination_type)
 
         if len(hub_routes) == 0:
             return []
@@ -40,7 +40,22 @@ class PathService:
         destination_route_data = cls.API_CLASS.distance_duration(hub_destinations, [dest])
 
         # combine all it
-        return cls.build_paths(source_route_data, destination_route_data, hub_routes, source, dest)
+        paths = cls.build_paths(source_route_data, destination_route_data, hub_routes, source, dest, source_type,
+                                destination_type)
+        return cls.excluded_circles(paths)
+
+    @classmethod
+    def excluded_circles(cls, paths: List[dataclass.Path]):
+        correct_paths = []
+        for i, path in enumerate(paths):
+            sources = []
+            for route in path.routes:
+                if route.destination in sources:
+                    break
+                sources.append(route.source)
+            else:
+                correct_paths.append(path)
+        return correct_paths
 
     @classmethod
     def build_paths(cls,
@@ -48,7 +63,9 @@ class PathService:
                     destination_route_data,
                     hub_routes,
                     source,
-                    dest
+                    dest,
+                    source_type,
+                    destination_type
                     ) -> list:
 
         paths = []
@@ -73,6 +90,16 @@ class PathService:
                 begin_route.distance = source_route_data[i][0]
                 begin_route.duration = source_route_data[i][1]
                 path.routes.append(begin_route)
+            elif source_type == PlaceType.CITY.value:
+                begin_route = RouteInPath(
+                    source=source,
+                    destination=source,
+                    type=RouteType.TRUCK.value,
+                    is_hub=False
+                )
+                begin_route.distance = 0
+                begin_route.duration = 0
+                path.routes.append(begin_route)
 
             for route in hub_route:
                 path.routes.append(route)
@@ -87,6 +114,16 @@ class PathService:
                 end_route.distance = destination_route_data[i][0]
                 end_route.duration = destination_route_data[i][1]
                 path.routes.append(end_route)
+            elif destination_type == PlaceType.CITY.value:
+                end_route = RouteInPath(
+                    source=dest,
+                    destination=dest,
+                    type=RouteType.TRUCK.value,
+                    is_hub=False
+                )
+                end_route.distance = 0
+                end_route.duration = 0
+                path.routes.append(end_route)
 
             paths.append(path)
 
@@ -94,7 +131,7 @@ class PathService:
 
     @classmethod
     def calculate(cls, path: Union[dataclass.Path, models.Path], good: Good, special: Special = Special()):
-
+        print("CALCULATE")
         total_cost = 0
         total_duration = PathDuration(1, 1)
         total_distance = 0
@@ -114,22 +151,22 @@ class PathService:
             raise ValueError(
                 f"path must be route.service.models.Path or route.models.Path instance. Got {type(path)} instead"
             )
-
+        print('calculate routes')
         for route in routes:
-
+            print('\troute: ', route)
             if route.is_hub:
                 cost = cls.cost_of_hub_route(route, good)
+                print('\thub route cost: ', cost)
             else:
                 cost = cls.cost_of_auxiliary_route(route, good)
+                print('\tauxiliary route cost: ', cost)
 
-            total_cost += cost * route.distance
+            total_cost += cost
             total_distance += route.distance
 
-            if isinstance(route, HubRoute):
-                duration_best = (route.duration_from_department(departure_date_best) // 60 + 23) // 24
-                duration_worst = (route.duration_from_department(
-                    departure_date_worst + datetime.timedelta(days=1)) // 60 + 23) // 24 + 1
-
+            if route.is_hub:
+                duration_best = route.duration_from_department(departure_date_best)
+                duration_worst = route.duration_from_department(departure_date_worst + datetime.timedelta(days=1))
                 total_duration.min += duration_best
                 total_duration.max += duration_worst
 
@@ -137,8 +174,8 @@ class PathService:
                 departure_date_worst += datetime.timedelta(days=duration_worst)
 
             else:
-                total_duration.min += (route.duration // 60 + 23) // 24
-                total_duration.max += (route.duration // 60 + 23) // 24 + 1
+                total_duration.min += route.duration
+                total_duration.max += route.duration + 1
 
         path.total_duration = total_duration
         path.total_distance = total_distance
@@ -147,14 +184,19 @@ class PathService:
         return path
 
     @classmethod
-    def hub_routes_by_zone(cls, source_zone: Zone, dest_zone: Zone):
+    def hub_routes_by_zone(cls, source_zone: Zone, dest_zone: Zone, source_type=PlaceType.default().value,
+                           destination_type=PlaceType.default().value):
         """ Search all routes from source zone to destination zone. U """
 
         if source_zone is None or dest_zone is None:
             return []
 
-        routes = [(route,) for route in HubRoute.objects.find_by_zone(source_zone, dest_zone)]
-        routes += cls.routes_via_waypoint_zone(source_zone, dest_zone)
+        routes_query = HubRoute.objects \
+            .find_by_zone(source_zone, dest_zone) \
+            .filter(source__types__contains=[source_type], destination__types__contains=[destination_type])
+
+        routes = [(route,) for route in routes_query.all()]
+        routes += cls.routes_via_waypoint_zone(source_zone, dest_zone, source_type, destination_type)
 
         return routes
 
@@ -162,21 +204,33 @@ class PathService:
     def cost_of_hub_route(cls, route: HubRoute, good: Good):
 
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good)
+        print('\t\tcost_ldm: ', cost_ldm)
+        print('\t\tcost_size: ', cost_size)
+        print('\t\tcost_mass: ', cost_mass)
         cost_service = cls.cost_by_services(route, good)
+        print('\t\tcost_service: ', cost_service)
 
-        return max(cost_ldm, cost_size, cost_mass) + cost_service
+        return max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
 
     @classmethod
     def cost_of_auxiliary_route(cls, route: RouteInPath, good: Good):
         zone = route.source.state.zone
+        pricing_info = zone.pricing_info
+        if route.distance < pricing_info.minimal_distance:
+            distance = pricing_info.minimal_distance
+        else:
+            distance = route.distance
+
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good)
 
-        return max(cost_ldm, cost_size, cost_mass)
+        return max(cost_ldm, cost_size, cost_mass) * distance
 
     @classmethod
-    def routes_via_waypoint_zone(cls, source_zone, destination_zone):
+    def routes_via_waypoint_zone(cls, source_zone, destination_zone, source_type=PlaceType.default().value,
+                                 destination_type=PlaceType.default().value):
         with connection.cursor() as cursor:
-            cursor.execute(ROUTES_VIA_WAYPOINT_ZONE_QUERY, [source_zone.id, destination_zone.id])
+            cursor.execute(ROUTES_VIA_WAYPOINT_ZONE_QUERY,
+                           [source_zone.id, source_type, destination_zone.id, destination_type])
             rows = cursor.fetchall()
         return cls.to_routes(rows)
 

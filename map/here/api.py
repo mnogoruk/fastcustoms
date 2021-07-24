@@ -67,9 +67,9 @@ class MapAPI(RoutingApi, AbstractMapAPI):
         errors = data['matrix'].get('errorCodes')
 
         if errors is None:
-            errors = [0 for i in range(routes_count)]
-
-        return [(distances[i], durations[i], errors[i]) for i in range(routes_count)]
+            errors = [0 for _ in range(routes_count)]
+        # distance in km, duration in days
+        return [(distances[i] / 1000, durations[i] / 60 / 24 / 60, errors[i]) for i in range(routes_count)]
 
     def sync_matrix(
             self,

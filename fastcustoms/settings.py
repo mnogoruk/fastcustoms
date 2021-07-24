@@ -11,23 +11,25 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
-import dj_database_url
-import django_heroku
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+import django_heroku
+import dj_database_url
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xexg*k!xwlf7!9$@!v8x9oh%3movz!pr^_0ofdwc3oov#z6vk('
+# SECURITY WARNINsG: keep the secret key used in production secret!
+SECRET_KEY = 'wegrbehbfjenwigbejkrnbinsdbjneiurnbiuerwbjrknffjkn'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
+# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -48,7 +50,8 @@ INSTALLED_APPS = [
     'pricing',
     'goods',
     'order',
-    'customAdmin'
+    'customAdmin',
+    'common'
 ]
 CACHES = {
     'default': {
@@ -108,6 +111,7 @@ options.pop('sslmode', None)
 #         'PORT': 5432
 #     }
 # }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
