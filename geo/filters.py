@@ -32,7 +32,7 @@ class StateFilter(filters.BaseFilterBackend):
         zone_name = params.get('zone')
 
         empty = params.get('empty')
-        if empty in ('on', 'True', '', True):
+        if empty in ('on', 'True', '', True, '1', 'true'):
             empty = True
         else:
             empty = False

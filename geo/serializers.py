@@ -15,7 +15,7 @@ class WithAliasSerializer(serializers.ModelSerializer):
 
     @classmethod
     def alias_fields(cls):
-        return  [cls.alias_prefix + al for al in cls.allowed_alias]
+        return [cls.alias_prefix + al for al in cls.allowed_alias]
 
     def __init__(self, *args, **kwargs):
 
@@ -30,6 +30,12 @@ class WithAliasSerializer(serializers.ModelSerializer):
             existing = set(self.allowed_alias)
             for al in (existing - current):
                 self.fields.pop(self.alias_prefix + al)
+
+
+class ZoneShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Zone
+        fields = ['id', 'name']
 
 
 class ZoneSerializer(serializers.ModelSerializer):

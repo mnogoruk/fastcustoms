@@ -3,13 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK
 
 from common.models import Customs
-from customAdmin.serializers import HubRouteAdminSerializer, ZoneRatesAdminSerializer, OrderAdminSerializer
+from customAdmin.serializers import HubRouteAdminSerializer, ZoneRatesAdminSerializer, OrderAdminSerializer, \
+    ZoneCreateSerializer
 from geo.models import Zone, State
-from geo.serializers import ZoneSerializer
+from geo.serializers import ZoneSerializer, ZoneShortSerializer
 from order.models import Order
 from route.models import HubRoute
 from utils.views.mixins import FullnessMixin
@@ -59,8 +61,8 @@ class ZoneViewSet(ModelViewSet):
             res.append(zone_dict)
         return Response(data=res)
 
-    @action(detail=True, methods=['post'], name='Add states to zone', url_path='states', url_name='add-state-to-zone')
-    def add_state(self, request):
+    @action(detail=True, methods=['post'], name='Add states to zone', url_path='states/add', url_name='add-state-to-zone')
+    def add_state(self, request, pk):
         try:
             state_id = request.data['state_id']
         except KeyError:
@@ -74,11 +76,11 @@ class ZoneViewSet(ModelViewSet):
         zone = self.get_object()
         state.zone = zone
         state.save()
-        return Response(data={'status': '201'}, status=HTTP_201_CREATED)
+        return Response(data={'status': '200'}, status=HTTP_200_OK)
 
-    @action(detail=True, methods=['post'], name='Remove state from zone', url_path='states\delete',
+    @action(detail=True, methods=['post'], name='Remove state from zone', url_path='states/delete',
             url_name='remove-state-from-zone')
-    def remove_state(self, request):
+    def remove_state(self, request, pk):
         try:
             state_id = request.data['state_id']
         except KeyError:
@@ -96,6 +98,11 @@ class ZoneViewSet(ModelViewSet):
         state.zone = None
         state.save()
         return Response(data={'status': '200'}, status=HTTP_200_OK)
+
+
+class ZoneCreateView(CreateAPIView):
+    serializer_class = ZoneCreateSerializer
+    queryset = HubRoute.objects.all()
 
 
 class OrderViewSet(ModelViewSet):

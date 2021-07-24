@@ -30,6 +30,7 @@ class CountryViewSet(ModelViewSet):
         kwargs.setdefault('context', self.get_serializer_context())
         return serializer_class(*args, alias=alias, **kwargs)
 
+
 class StateViewSet(ModelViewSet):
     serializer_class = StateSerializer
     filter_backends = [StateFilter]

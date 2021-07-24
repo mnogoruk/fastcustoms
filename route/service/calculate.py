@@ -42,6 +42,9 @@ class PathService:
         # combine all it
         paths = cls.build_paths(source_route_data, destination_route_data, hub_routes, source, dest, source_type,
                                 destination_type)
+        print('paths')
+        print()
+        print(paths)
         return cls.excluded_circles(paths)
 
     @classmethod
