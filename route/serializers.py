@@ -1,20 +1,12 @@
 from rest_framework import serializers
 
-<<<<<<< HEAD
 
-=======
 from geo.models import City
->>>>>>> master
 from geo.serializers import CitySerializer, CityShortSerializer
 from goods.serializers import GoodSerializer
 from order.models import Special
-<<<<<<< HEAD
-from utils.calculation import ldm_from_size
-from utils.enums import RouteType
-=======
 
 from utils.enums import RouteType, PlaceType
->>>>>>> master
 from utils.serializers.fileds import PureLookUpFiled
 from route.models import HubRoute, RouteTimeTable, RouteInPath
 
@@ -107,8 +99,6 @@ class PathToCalculateSerializer(serializers.Serializer):
 
     good = GoodSerializer(required=True)
     special = SpecialSerializer(required=False)
-<<<<<<< HEAD
-=======
+
     source_type = serializers.ChoiceField(choices=PlaceType.choices(), default=PlaceType.CITY.value)
     destination_type = serializers.ChoiceField(choices=PlaceType.choices(), default=PlaceType.CITY.value)
->>>>>>> master
