@@ -11,23 +11,25 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
-import dj_database_url
-import django_heroku
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+import django_heroku
+import dj_database_url
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xexg*k!xwlf7!9$@!v8x9oh%3movz!pr^_0ofdwc3oov#z6vk('
+# SECURITY WARNINsG: keep the secret key used in production secret!
+SECRET_KEY = 'wegrbehbfjenwigbejkrnbinsdbjneiurnbiuerwbjrknffjkn'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
+# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -102,12 +104,13 @@ WSGI_APPLICATION = 'fastcustoms.wsgi.application'
 # options.pop('sslmode', None)
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'fastcustoms',
-        'USER': 'postgres',
-        'PASSWORD': '1',
-        'PORT': 5432
+    "default": {
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", os.path.join(BASE_DIR, "db.sqlite3")),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
 

@@ -16,6 +16,7 @@ class OrderAgent(models.Model):
 class Special(models.Model):
     departure_date = models.DateField(null=True)
 
+
 class Order(models.Model):
     agent = models.OneToOneField(OrderAgent, on_delete=models.CASCADE, related_name='order', null=True, default=None)
 
@@ -23,3 +24,4 @@ class Order(models.Model):
     good = models.OneToOneField(Good, on_delete=models.CASCADE, related_name='order')
     special = models.OneToOneField(Special, on_delete=models.CASCADE, related_name='order', null=True)
     time_stamp = models.DateTimeField(auto_created=True, auto_now_add=True)
+    customs = models.BooleanField(default=False)

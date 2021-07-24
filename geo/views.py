@@ -25,6 +25,7 @@ class CountryViewSet(ModelViewSet):
 
         if isinstance(alias, str):
             alias = alias.split(',')
+        print(alias)
         serializer_class = self.get_serializer_class()
         kwargs.setdefault('context', self.get_serializer_context())
         return serializer_class(*args, alias=alias, **kwargs)
