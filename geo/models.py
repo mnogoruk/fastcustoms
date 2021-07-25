@@ -25,8 +25,6 @@ class Country(models.Model):
     alias_en = models.CharField(max_length=200, null=True, default=None)
     alias_ru = models.CharField(max_length=200, null=True, default=None)
 
-    capital = models.OneToOneField('City', on_delete=models.SET_NULL, null=True, related_name='country_as_capital')
-
     def __str__(self):
         return f"{self.name}"
 
