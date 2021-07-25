@@ -19,7 +19,7 @@ from route.serializers import HubRouteShortSerializer
 
 
 class RouteView(ModelViewSet, FullnessMixin):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = HubRouteAdminSerializer
     queryset = HubRoute.objects.all()
 
@@ -41,7 +41,7 @@ class RouteView(ModelViewSet, FullnessMixin):
 
 
 class ZoneViewSet(ModelViewSet):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ZoneRatesAdminSerializer
     queryset = Zone.objects.all()
 
@@ -61,7 +61,8 @@ class ZoneViewSet(ModelViewSet):
             res.append(zone_dict)
         return Response(data=res)
 
-    @action(detail=True, methods=['post'], name='Add states to zone', url_path='states/add', url_name='add-state-to-zone')
+    @action(detail=True, methods=['post'], name='Add states to zone', url_path='states/add',
+            url_name='add-state-to-zone')
     def add_state(self, request, pk):
         try:
             state_id = request.data['state_id']
@@ -101,17 +102,19 @@ class ZoneViewSet(ModelViewSet):
 
 
 class ZoneCreateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
     serializer_class = ZoneCreateSerializer
     queryset = HubRoute.objects.all()
 
 
 class OrderViewSet(ModelViewSet):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = OrderAdminSerializer
     queryset = Order.objects.all()
 
 
 class CustomsEditView(APIView):
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         try:
@@ -123,3 +126,10 @@ class CustomsEditView(APIView):
         c.text = text
         c.save()
         return Response(data={'status': 'success'}, status=HTTP_200_OK)
+
+
+class PingView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        return Response(data={'version': '0.0.1-beta'})

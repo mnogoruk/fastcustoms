@@ -1,7 +1,7 @@
 from rest_framework.routers import SimpleRouter
 from rest_framework_simplejwt import views as jwt_views
 from django.urls import path
-from .views import RouteView, ZoneViewSet, OrderViewSet, CustomsEditView, ZoneCreateView
+from .views import RouteView, ZoneViewSet, OrderViewSet, CustomsEditView, ZoneCreateView, PingView
 
 router = SimpleRouter()
 router.register('admin-routes', RouteView)
@@ -19,4 +19,7 @@ urlpatterns.append(
 )
 urlpatterns.append(
     path('zones/create/', ZoneCreateView.as_view(), name='zone-create')
+)
+urlpatterns.append(
+    path('ping/', PingView.as_view(), name='admin-ping')
 )
