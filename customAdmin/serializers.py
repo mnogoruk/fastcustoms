@@ -188,22 +188,8 @@ class ZoneRatesAdminSerializer(ModelSerializer):
         fields = '__all__'
 
 
-class PathCreatableSerializer(PathSerializer):
-    routes = PathRouteCreatableSerializer(many=True)
-
-
 class OrderAdminSerializer(OrderSerializer):
-    path = PathCreatableSerializer()
-
-    def create(self, validated_data):
-        agent = OrderAgent.objects.create(**validated_data.pop('agent'))
-        path = Path.creatable.create(**validated_data.pop('path'))
-        good = Good.creatable.create(**validated_data.pop('good'))
-        if 'special' in validated_data:
-            special = Special.objects.create(**validated_data.pop('special'))
-        else:
-            special = Special.objects.create()
-        return Order.objects.create(agent=agent, path=path, good=good, special=special)
+    pass
 
 
 class ZoneCreateSerializer(ZoneShortSerializer):
