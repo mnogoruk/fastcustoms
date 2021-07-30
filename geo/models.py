@@ -34,6 +34,10 @@ class Zone(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     code = models.CharField(max_length=5, null=True)
 
+    @property
+    def minimal_price(self):
+        return self.pricing_info.minimal_price
+
     def associate_with_country(self, country):
         """ Just add all country states to zone. """
         with transaction.atomic():

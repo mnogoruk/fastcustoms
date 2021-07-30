@@ -63,4 +63,4 @@ class ServiceRanked(AbstractCreate):
 
 class ZonePricingInfo(models.Model):
     zone = models.OneToOneField(Zone, on_delete=models.CASCADE, related_name='pricing_info')
-    minimal_distance = models.IntegerField(default=0)
+    minimal_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)  # euro

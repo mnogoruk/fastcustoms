@@ -158,9 +158,11 @@ class PathService:
         for route in routes:
             print('\troute: ', route)
             if route.is_hub:
+                print('\tcost of hub route')
                 cost = cls.cost_of_hub_route(route, good)
                 print('\thub route cost: ', cost)
             else:
+                print('\tcost of auxiliary route')
                 cost = cls.cost_of_auxiliary_route(route, good)
                 print('\tauxiliary route cost: ', cost)
 
@@ -205,28 +207,37 @@ class PathService:
 
     @classmethod
     def cost_of_hub_route(cls, route: HubRoute, good: Good):
-
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good)
         print('\t\tcost_ldm: ', cost_ldm)
         print('\t\tcost_size: ', cost_size)
         print('\t\tcost_mass: ', cost_mass)
         cost_service = cls.cost_by_services(route, good)
         print('\t\tcost_service: ', cost_service)
-
-        return max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
+        cost = max(cost_ldm, cost_size, cost_mass) * route.distance
+        if cost < route.minimal_price:
+            cost = route.minimal_price
+            print('\t\tuse minimal distance')
+            print(f'\t\tminimal cost: {route.minimal_price}')
+        print(f'\t\ttotal cost: {cost}')
+        return cost + cost_service
 
     @classmethod
     def cost_of_auxiliary_route(cls, route: RouteInPath, good: Good):
         zone = route.source.state.zone
         pricing_info = zone.pricing_info
-        if route.distance < pricing_info.minimal_distance:
-            distance = pricing_info.minimal_distance
-        else:
-            distance = route.distance
+        distance = route.distance
 
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good)
-
-        return max(cost_ldm, cost_size, cost_mass) * distance
+        print('\t\tcost_ldm: ', cost_ldm)
+        print('\t\tcost_size: ', cost_size)
+        print('\t\tcost_mass: ', cost_mass)
+        cost = max(cost_ldm, cost_size, cost_mass) * distance
+        if cost < pricing_info.minimal_price:
+            cost = pricing_info.minimal_price
+            print('\t\tuse minimal distance')
+            print(f'\t\tminimal cost: {pricing_info.minimal_price}')
+        print(f'\t\ttotal cost: {cost}')
+        return cost
 
     @classmethod
     def routes_via_waypoint_zone(cls, source_zone, destination_zone, source_type=PlaceType.default().value,

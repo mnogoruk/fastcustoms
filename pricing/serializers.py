@@ -14,11 +14,13 @@ class ZoneRateSerializer(serializers.ModelSerializer):
         model = ZoneRate
         exclude = ['id', 'zone', 'created_at']
 
+
 class ServiceAdditionalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceAdditional
         exclude = ['id', 'route', 'created_at']
+
 
 class ServiceRankedSerializer(serializers.ModelSerializer):
 
