@@ -31,7 +31,7 @@ class HubRoute(AbstractCreate):
     type = models.CharField(max_length=20, default=RouteType.TRUCK.value, choices=RouteType.choices())
 
     timetable = models.OneToOneField(RouteTimeTable, on_delete=models.SET_NULL, null=True)
-
+    minimal_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)  # euro
     distance = models.FloatField()  # km
     duration = models.FloatField()  # days
 

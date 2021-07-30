@@ -2,19 +2,16 @@ import string
 from random import choice
 
 from django.db import transaction
-from django.db.models import Count, Q
-from rest_framework.serializers import ValidationError, ModelSerializer, Serializer, PrimaryKeyRelatedField
-
-from geo.models import City, Zone, State
+from rest_framework.serializers import ValidationError, ModelSerializer
+from rest_framework import serializers
+from geo.models import City, Zone
 from geo.serializers import ZoneShortSerializer
-from goods.models import Good
-from order.models import OrderAgent, Special, Order
 from order.serializers import OrderSerializer
 from pricing.models import RouteRate, ZoneRate, ServiceAdditional, ServiceRanked, ZonePricingInfo
 from pricing.serializers import ZoneRateSerializer, ServiceRankedSerializer, ServiceAdditionalSerializer, \
     RouteRateSerializer
-from route.models import HubRoute, RouteTimeTable, Path
-from route.serializers import HubRouteSerializer, RouteTimeTableSerializer, PathSerializer, PathRouteCreatableSerializer
+from route.models import HubRoute, RouteTimeTable
+from route.serializers import HubRouteSerializer, RouteTimeTableSerializer
 from utils.enums import RouteType, PlaceType
 from utils.functions import place_type_related_to_route_type
 
@@ -159,6 +156,7 @@ class HubRouteAdminSerializer(HubRouteSerializer):
 
 class ZoneRatesAdminSerializer(ModelSerializer):
     rates = ZoneRateSerializer(many=True)
+    minimal_price = serializers.DecimalField(max_digits=20, decimal_places=2)
 
     def validate_rates(self, rates):
         # TODO: validate intersections
@@ -171,13 +169,21 @@ class ZoneRatesAdminSerializer(ModelSerializer):
     def create(self, validated_data):
         rates = validated_data.pop('rates')
         zone = super(ZoneRatesAdminSerializer, self).create(validated_data)
+        minimal_price = validated_data.pop('minimal_price')
+        z = ZonePricingInfo.objects.create(zone=zone, minimal_price=minimal_price)
+        print(z)
         for rate in rates:
             ZoneRate.objects.create(**rate, zone=zone)
+        zone.minimal_price = minimal_price
         return zone
 
     def update(self, zone: Zone, validated_data):
         rates = validated_data.pop('rates')
+        minimal_price = validated_data.pop('minimal_price')
+
         zone = super(ZoneRatesAdminSerializer, self).update(zone, validated_data)
+        zone.pricing_info.minimal_price = minimal_price
+        zone.pricing_info.save()
         zone.rates.all().delete()
         for rate in rates:
             ZoneRate.objects.create(**rate, zone=zone)
@@ -198,5 +204,5 @@ class ZoneCreateSerializer(ZoneShortSerializer):
         slug = name + ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(6))
         validated_data['slug'] = slug
         zone = super(ZoneCreateSerializer, self).create(validated_data)
-        ZonePricingInfo.objects.create(zone=zone, minimal_distance=10)
+        ZonePricingInfo.objects.create(zone=zone)
         return zone
