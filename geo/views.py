@@ -13,11 +13,13 @@ from utils.enums import PlaceType
 class ZoneViewSet(ModelViewSet):
     serializer_class = ZoneSerializer
     queryset = Zone.objects.all()
+    http_method_names = ['get', 'head', 'options']
 
 
 class CountryViewSet(ModelViewSet):
     serializer_class = CountrySerializer
     queryset = Country.objects.all()
+    http_method_names = ['get', 'head', 'options']
 
     def get_serializer(self, *args, **kwargs):
         params = self.request.query_params
@@ -35,12 +37,14 @@ class StateViewSet(ModelViewSet):
     serializer_class = StateSerializer
     filter_backends = [StateFilter]
     queryset = State.objects.all()
+    http_method_names = ['get', 'head', 'options']
 
 
 class CityViewSet(ModelViewSet):
     serializer_class = CitySerializer
     filter_backends = [CityFilter]
     queryset = City.objects.all()
+    http_method_names = ['get', 'head', 'options']
 
     def get_serializer(self, *args, **kwargs):
         params = self.request.query_params

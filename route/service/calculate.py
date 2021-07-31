@@ -83,7 +83,7 @@ class PathService:
             path = dataclass.Path()
             hub_route = hub_routes[i]
 
-            if source.id != hub_route[0].source_id:
+            if source.id != hub_route[0].source_id and source_type == PlaceType.CITY.value:
                 begin_route = RouteInPath(
                     source=source,
                     destination=hub_route[0].source,
@@ -107,7 +107,7 @@ class PathService:
             for route in hub_route:
                 path.routes.append(route)
 
-            if dest.id != hub_route[-1].destination_id:
+            if dest.id != hub_route[-1].destination_id and destination_type == PlaceType.CITY.value:
                 end_route = RouteInPath(
                     source=hub_route[-1].destination,
                     destination=dest,
@@ -213,13 +213,13 @@ class PathService:
         print('\t\tcost_mass: ', cost_mass)
         cost_service = cls.cost_by_services(route, good)
         print('\t\tcost_service: ', cost_service)
-        cost = max(cost_ldm, cost_size, cost_mass) * route.distance
+        cost = max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
         if cost < float(route.minimal_price):
             cost = float(route.minimal_price)
             print('\t\tuse minimal distance')
             print(f'\t\tminimal cost: {route.minimal_price}')
         print(f'\t\ttotal cost: {cost}')
-        return cost + cost_service
+        return cost
 
     @classmethod
     def cost_of_auxiliary_route(cls, route: RouteInPath, good: Good):
