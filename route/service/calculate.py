@@ -214,8 +214,8 @@ class PathService:
         cost_service = cls.cost_by_services(route, good)
         print('\t\tcost_service: ', cost_service)
         cost = max(cost_ldm, cost_size, cost_mass) * route.distance
-        if cost < route.minimal_price:
-            cost = route.minimal_price
+        if cost < float(route.minimal_price):
+            cost = float(route.minimal_price)
             print('\t\tuse minimal distance')
             print(f'\t\tminimal cost: {route.minimal_price}')
         print(f'\t\ttotal cost: {cost}')
@@ -232,8 +232,8 @@ class PathService:
         print('\t\tcost_size: ', cost_size)
         print('\t\tcost_mass: ', cost_mass)
         cost = max(cost_ldm, cost_size, cost_mass) * distance
-        if cost < pricing_info.minimal_price:
-            cost = pricing_info.minimal_price
+        if cost < float(pricing_info.minimal_price):
+            cost = float(pricing_info.minimal_price)
             print('\t\tuse minimal distance')
             print(f'\t\tminimal cost: {pricing_info.minimal_price}')
         print(f'\t\ttotal cost: {cost}')
