@@ -8,6 +8,7 @@ class SelectableMixin:
         choices = [(member.name, member.value) for member in cls.__members__.values()]
         return choices
 
+
 class RouteType(SelectableMixin, Enum):
     TRUCK = 'TRUCK'
     TRAIN = 'TRAIN'
@@ -16,6 +17,7 @@ class RouteType(SelectableMixin, Enum):
     @classmethod
     def default(cls):
         return cls.TRUCK
+
 
 class PlaceType(SelectableMixin, Enum):
     CITY = 'CITY'

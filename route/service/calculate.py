@@ -83,7 +83,7 @@ class PathService:
             path = dataclass.Path()
             hub_route = hub_routes[i]
 
-            if source.id != hub_route[0].source_id:
+            if source.id != hub_route[0].source_id and source_type == PlaceType.CITY.value:
                 begin_route = RouteInPath(
                     source=source,
                     destination=hub_route[0].source,
@@ -107,7 +107,7 @@ class PathService:
             for route in hub_route:
                 path.routes.append(route)
 
-            if dest.id != hub_route[-1].destination_id:
+            if dest.id != hub_route[-1].destination_id and destination_type == PlaceType.CITY.value:
                 end_route = RouteInPath(
                     source=hub_route[-1].destination,
                     destination=dest,
