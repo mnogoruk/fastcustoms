@@ -23,6 +23,7 @@ class PathView(GenericAPIView):
 class RouteViewSet(ModelViewSet):
     queryset = HubRoute.objects.all()
     serializer_class = HubRouteSerializer
+    http_method_names = ['get', 'head', 'options']
 
     def get_object(self):
         obj = super().get_object()
@@ -32,5 +33,7 @@ class RouteViewSet(ModelViewSet):
 class PathViewSet(ModelViewSet):
     queryset = Path.objects.all()
     serializer_class = PathSerializer
+    http_method_names = ['get', 'head', 'options']
+
 
 
