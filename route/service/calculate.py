@@ -213,13 +213,13 @@ class PathService:
         print('\t\tcost_mass: ', cost_mass)
         cost_service = cls.cost_by_services(route, good)
         print('\t\tcost_service: ', cost_service)
-        cost = max(cost_ldm, cost_size, cost_mass) * route.distance
+        cost = max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
         if cost < float(route.minimal_price):
             cost = float(route.minimal_price)
             print('\t\tuse minimal distance')
             print(f'\t\tminimal cost: {route.minimal_price}')
         print(f'\t\ttotal cost: {cost}')
-        return cost + cost_service
+        return cost
 
     @classmethod
     def cost_of_auxiliary_route(cls, route: RouteInPath, good: Good):
