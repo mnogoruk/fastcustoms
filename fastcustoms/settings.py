@@ -19,13 +19,12 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNINsG: keep the secret key used in production secret!
 SECRET_KEY = 'wegrbehbfjenwigbejkrnbinsdbjneiurnbiuerwbjrknffjkn'
-
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 DEBUG = True
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.

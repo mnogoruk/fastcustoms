@@ -13,6 +13,7 @@ class RouteType(SelectableMixin, Enum):
     TRUCK = 'TRUCK'
     TRAIN = 'TRAIN'
     AIR = 'AIR'
+    SEA = 'SEA'
 
     @classmethod
     def default(cls):
@@ -21,9 +22,14 @@ class RouteType(SelectableMixin, Enum):
 
 class PlaceType(SelectableMixin, Enum):
     CITY = 'CITY'
-    AIRPORT = 'AIRPORT'
-    RAILWAY_STATION = 'RAILWAY_STATION'
-    SEAPORT = 'SEAPORT'
+    AIRPORT_SRC = 'AIRPORT_SRC'
+    AIRPORT_DST = 'AIRPORT_DST'
+    RAILWAY_STATION_SRC = 'RAILWAY_STATION_SRC'
+    RAILWAY_STATION_DST = 'RAILWAY_STATION_DST'
+    SEAPORT_SRC = 'SEAPORT_SRC'
+    SEAPORT_DST = 'SEAPORT_DST'
+    WAREHOUSE_SRC = 'WAREHOUSE_SRC'
+    WAREHOUSE_DST = 'WAREHOUSE_DST'
 
     @classmethod
     def default(cls):

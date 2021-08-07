@@ -26,7 +26,7 @@ class PathService:
     def paths(cls, source: City, dest: City, source_type, destination_type) -> list:
 
         # better if source and dest objects all have prefetched zone instance
-        hub_routes = cls.hub_routes_by_zone(source.state.zone, dest.state.zone, source_type, destination_type)
+        hub_routes = cls.hub_routes(source, dest, source_type, destination_type)
 
         if len(hub_routes) == 0:
             return []
@@ -75,58 +75,74 @@ class PathService:
 
         hub_routes_count = len(hub_routes)
 
+        print('BUILD PATHS\n-------------------')
         for i in range(hub_routes_count):
             if source_route_data[i][2] != 0 or destination_route_data[i][2] != 0:
                 # can't build path, because there is error in route matrix.
+                print('error in matrix')
                 continue
 
             path = dataclass.Path()
             hub_route = hub_routes[i]
+            print('hub_route: ', hub_route)
 
-            if source.id != hub_route[0].source_id and source_type == PlaceType.CITY.value:
-                begin_route = RouteInPath(
-                    source=source,
-                    destination=hub_route[0].source,
-                    type=RouteType.TRUCK.value,
-                    is_hub=False
-                )
-                begin_route.distance = source_route_data[i][0]
-                begin_route.duration = source_route_data[i][1]
-                path.routes.append(begin_route)
-            elif source_type == PlaceType.CITY.value:
-                begin_route = RouteInPath(
-                    source=source,
-                    destination=source,
-                    type=RouteType.TRUCK.value,
-                    is_hub=False
-                )
-                begin_route.distance = 0
-                begin_route.duration = 0
-                path.routes.append(begin_route)
+            if source_type == PlaceType.CITY.value:
+                print('source_type is CITY')
+                if hub_route[0].source_id != source.id:
+                    begin_route = RouteInPath(
+                        source=source,
+                        destination=hub_route[0].source,
+                        type=RouteType.TRUCK.value,
+                        is_hub=False
+                    )
+                    begin_route.distance = source_route_data[i][0]
+                    begin_route.duration = source_route_data[i][1]
+                    path.routes.append(begin_route)
+                    print('begin route: ', begin_route)
+
+                else:
+                    begin_route = RouteInPath(
+                        source=source,
+                        destination=source,
+                        type=RouteType.TRUCK.value,
+                        is_hub=False
+                    )
+                    begin_route.distance = 0
+                    begin_route.duration = 0
+                    path.routes.append(begin_route)
+                    print('begin route: ', begin_route)
+
+            else:
+                if hub_route[0].source_id != source.id:
+                    continue
 
             for route in hub_route:
                 path.routes.append(route)
 
-            if dest.id != hub_route[-1].destination_id and destination_type == PlaceType.CITY.value:
-                end_route = RouteInPath(
-                    source=hub_route[-1].destination,
-                    destination=dest,
-                    type=RouteType.TRUCK.value,
-                    is_hub=False
-                )
-                end_route.distance = destination_route_data[i][0]
-                end_route.duration = destination_route_data[i][1]
-                path.routes.append(end_route)
-            elif destination_type == PlaceType.CITY.value:
-                end_route = RouteInPath(
-                    source=dest,
-                    destination=dest,
-                    type=RouteType.TRUCK.value,
-                    is_hub=False
-                )
-                end_route.distance = 0
-                end_route.duration = 0
-                path.routes.append(end_route)
+            if destination_type == PlaceType.CITY.value:
+                if dest.id != hub_route[-1].destination_id:
+                    end_route = RouteInPath(
+                        source=hub_route[-1].destination,
+                        destination=dest,
+                        type=RouteType.TRUCK.value,
+                        is_hub=False
+                    )
+                    end_route.distance = destination_route_data[i][0]
+                    end_route.duration = destination_route_data[i][1]
+                    path.routes.append(end_route)
+                else:
+                    end_route = RouteInPath(
+                        source=dest,
+                        destination=dest,
+                        type=RouteType.TRUCK.value,
+                        is_hub=False
+                    )
+                    end_route.distance = 0
+                    end_route.duration = 0
+                    path.routes.append(end_route)
+            else:
+                if hub_route[-1].destination_id != dest.id:
+                    continue
 
             paths.append(path)
 
@@ -189,20 +205,35 @@ class PathService:
         return path
 
     @classmethod
-    def hub_routes_by_zone(cls, source_zone: Zone, dest_zone: Zone, source_type=PlaceType.default().value,
-                           destination_type=PlaceType.default().value):
+    def hub_routes(cls, source: City, dest: City, source_type=PlaceType.default().value,
+                   destination_type=PlaceType.default().value):
         """ Search all routes from source zone to destination zone. U """
+        source_zone = source.state.zone
+        dest_zone = dest.state.zone
+
+        routes_query = HubRoute.objects
 
         if source_zone is None or dest_zone is None:
             return []
 
-        routes_query = HubRoute.objects \
-            .find_by_zone(source_zone, dest_zone) \
-            .filter(source__types__contains=[source_type], destination__types__contains=[destination_type])
+        if source_type == PlaceType.CITY.value:
+            routes_query = routes_query.source_in_zone(zone=source_zone)
+        else:
+            routes_query = routes_query.filter(source=source).filter(source__types__contains=[source_type])
+
+        if destination_type == PlaceType.CITY.value:
+            routes_query = routes_query.dest_in_zone(zone=dest_zone)
+        else:
+            routes_query = routes_query.filter(destination=dest).filter(destination__types__contains=[destination_type])
 
         routes = [(route,) for route in routes_query.all()]
-        routes += cls.routes_via_waypoint_zone(source_zone, dest_zone, source_type, destination_type)
 
+        print('routes strait: ', routes)
+
+        routes_via_waypoint = cls.routes_via_waypoint_zone(source_zone, dest_zone, source_type, destination_type)
+        print('routes via waypoint: ', routes_via_waypoint)
+
+        routes += routes_via_waypoint
         return routes
 
     @classmethod

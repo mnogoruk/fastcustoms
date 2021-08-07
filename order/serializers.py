@@ -43,3 +43,4 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         exclude = ['time_stamp']
+        read_only_fields = ['slug']
