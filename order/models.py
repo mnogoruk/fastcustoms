@@ -1,3 +1,6 @@
+import uuid
+from uuid import uuid4
+
 from django.db import models
 
 # Create your models here.
@@ -7,14 +10,14 @@ from route.models import Path
 
 class OrderAgent(models.Model):
     company_name = models.CharField(max_length=250)
-    address = models.CharField(max_length=500)
-    contact_person = models.CharField(max_length=250)
     phone = models.CharField(max_length=50)
     email = models.EmailField(max_length=120)
+    comment = models.TextField(max_length=1000, default='')
 
 
 class Special(models.Model):
     departure_date = models.DateField(null=True)
+    send_mail = models.BooleanField(default=False)
 
 
 class Order(models.Model):
@@ -25,3 +28,4 @@ class Order(models.Model):
     special = models.OneToOneField(Special, on_delete=models.CASCADE, related_name='order', null=True)
     time_stamp = models.DateTimeField(auto_created=True, auto_now_add=True)
     customs = models.BooleanField(default=False)
+    slug = models.UUIDField(default=uuid.uuid4, editable=False)

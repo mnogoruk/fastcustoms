@@ -69,15 +69,16 @@ class HubRouteAdminSerializer(HubRouteSerializer):
         ranked_services = validated_data.pop('ranked_services', [])
 
         r_type = validated_data.get('type')
-        p_type = place_type_related_to_route_type(r_type)
+        p_type_s = place_type_related_to_route_type(r_type, 's')
+        p_type_d = place_type_related_to_route_type(r_type, 'd')
 
         with transaction.atomic():
             source = validated_data.pop('source')
-            source.add_type(p_type)
+            source.add_type(p_type_s)
             source.save()
 
             destination = validated_data.pop('destination')
-            destination.add_type(p_type)
+            destination.add_type(p_type_d)
             destination.save()
 
             if timetable:
@@ -124,25 +125,27 @@ class HubRouteAdminSerializer(HubRouteSerializer):
                 ServiceRanked.objects.create(**service, route=route)
 
         if route.type != validated_data.get('type', RouteType.default().value):
+
             old_r_type = route.type
-            old_p_type = place_type_related_to_route_type(old_r_type)
+            old_p_type_s = place_type_related_to_route_type(old_r_type, 's')
+            old_p_type_d = place_type_related_to_route_type(old_r_type, 'd')
 
             new_r_type = validated_data.get('type', RouteType.default().value)
-            new_p_type = place_type_related_to_route_type(new_r_type)
+            new_p_type_s = place_type_related_to_route_type(new_r_type, 's')
+            new_p_type_d = place_type_related_to_route_type(new_r_type, 'd')
 
-            route.source.add_type(new_p_type)
-            route.destination.add_type(new_p_type)
+            route.source.add_type(new_p_type_s)
+            route.destination.add_type(new_p_type_d)
 
-            if old_p_type != PlaceType.CITY:
+            if old_p_type_s != PlaceType.CITY.value:
+                src_count = HubRoute.objects.src_count_by_type(source=route.source, r_type=old_r_type)
+                if src_count <= 1:
+                    route.source.exclude_type(old_p_type_s)
 
-                place_counts = HubRoute.objects.places_count_by_type(source=route.source,
-                                                                     dest=route.destination,
-                                                                     r_type=old_r_type)
-
-                if place_counts['source_count'] <= 1:
-                    route.source.exclude_type(old_p_type)
-                if place_counts['destination_count'] <= 1:
-                    route.destination.exclude_type(old_p_type)
+            if old_p_type_d != PlaceType.CITY.value:
+                dst_count = HubRoute.objects.dst_count_by_type(dest=route.destination, r_type=old_r_type)
+                if dst_count <= 1:
+                    route.destination.exclude_type(old_p_type_d)
 
             route.source.save()
             route.destination.save()

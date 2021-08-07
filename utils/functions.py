@@ -13,14 +13,28 @@ def circle_search(array: list, index_from: int = 0, search_value=1):
         return len(array) - index_from + ind
 
 
-def place_type_related_to_route_type(r_type):
+def place_type_related_to_route_type(r_type, flg):
     if r_type == RouteType.AIR.value:
-        p_type = PlaceType.AIRPORT
+        if flg == 's':
+            p_type = PlaceType.AIRPORT_SRC.value
+        else:
+            p_type = PlaceType.AIRPORT_DST.value
     elif r_type == RouteType.TRAIN.value:
-        p_type = PlaceType.RAILWAY_STATION
+        if flg == 's':
+            p_type = PlaceType.RAILWAY_STATION_SRC.value
+        else:
+            p_type = PlaceType.RAILWAY_STATION_DST.value
     elif r_type == RouteType.TRUCK.value:
-        p_type = PlaceType.CITY
+        if flg == 's':
+            p_type = PlaceType.WAREHOUSE_SRC.value
+        else:
+            p_type = PlaceType.WAREHOUSE_DST.value
+    elif r_type == RouteType.SEA.value:
+        if flg == 's':
+            p_type = PlaceType.SEAPORT_SRC
+        else:
+            p_type = PlaceType.SEAPORT_DST
     else:
-        p_type = PlaceType.default()
+        p_type = PlaceType.default().value
 
     return p_type

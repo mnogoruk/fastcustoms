@@ -81,12 +81,12 @@ class City(models.Model):
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, related_name='cities')
 
     def add_type(self, place_type: PlaceType):
-        if place_type.value not in self.types:
-            self.types.append(place_type.value)
+        if place_type not in self.types:
+            self.types.append(place_type)
 
     def exclude_type(self, place_type: PlaceType):
-        if place_type.value in self.types:
-            self.types.remove(place_type.value)
+        if place_type in self.types:
+            self.types.remove(place_type)
 
     @property
     def location(self):

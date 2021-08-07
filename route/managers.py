@@ -1,38 +1,39 @@
 from django.db import transaction
-from django.db.models import Manager, Sum, Count, Q
+from django.db.models import Manager, Sum, Count, Q, QuerySet
 
 from geo.models import Zone, Country, City
 from utils.enums import PlaceType, RouteType
 
 
-class HubRouteManager(Manager):
-
-    def find_by_zone(self, source: Zone, dest: Zone):
+class HubRouteQuerySet(QuerySet):
+    def source_in_zone(self, zone: Zone):
         return self.filter(
-            source__state__zone__id=source.id,
-            destination__state__zone__id=dest.id
+            source__state__zone=zone,
         )
 
-    def find_by_country(self, source: Country, dest: Country):
+    def dest_in_zone(self, zone: Zone):
         return self.filter(
-            source__state__country=source,
-            destination__state__country=dest
+            destination__state__zone=zone
         )
 
+
+class HubRouteBaseManager(Manager):
     def with_additional_services_cost(self):
         return self.annotate(additional_services_cost=Sum('additional_services__price'))
 
     def routes_related_to_city(self, city: City):
         return self.filter(source=city).union(self.filter(destionation=city))
 
-    def places_count_by_type(self, source: City, dest: City, r_type: str):
-        qss = self.filter(source=source, type=r_type)\
-            .union(
-            self.filter(destination=source, type=r_type))
-        qsd = self.filter(source=dest, type=r_type)\
-            .union(
-            self.filter(destination=dest, type=r_type))
-        return {'source_count': qss.count(), 'destination_count': qsd.count()}
+    def src_count_by_type(self, source: City, r_type: str):
+        qss = self.filter(source=source, type=r_type)
+        return qss.count()
+
+    def dst_count_by_type(self, dest: City, r_type: str):
+        qsd = self.filter(destination=dest, type=r_type)
+        return qsd.count()
+
+
+HubRouteManager = HubRouteBaseManager.from_queryset(HubRouteQuerySet)
 
 
 class PathCreatableManager(Manager):
