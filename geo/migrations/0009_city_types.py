@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='city',
             name='types',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(choices=[('CITY', 'CITY'), ('AIRPORT', 'AIRPORT'), ('RAILWAY_STATION', 'RAILWAY_STATION'), ('SEAPORT', 'SEAPORT')], max_length=20), default=geo.models.default_type, size=6),
+            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(choices=[('CITY', 'CITY'), ('AIRPORT_SRC', 'AIRPORT_SRC'), ('AIRPORT_DST', 'AIRPORT_DST'), ('RAILWAY_STATION_SRC', 'RAILWAY_STATION_SRC'), ('RAILWAY_STATION_DST', 'RAILWAY_STATION_DST'), ('SEAPORT_SRC', 'SEAPORT_SRC'), ('SEAPORT_DST', 'SEAPORT_DST'), ('WAREHOUSE_SRC', 'WAREHOUSE_SRC'), ('WAREHOUSE_DST', 'WAREHOUSE_DST')], max_length=20), default=geo.models.default_type, size=6)
         ),
     ]
