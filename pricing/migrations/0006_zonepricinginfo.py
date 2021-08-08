@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='ZonePricingInfo',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('minimal_distance', models.IntegerField()),
+                ('minimal_price', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
                 ('zone', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='pricing_info', to='geo.zone')),
             ],
         ),
