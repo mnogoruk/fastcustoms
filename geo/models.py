@@ -74,8 +74,8 @@ class City(models.Model):
     alias_ru = models.CharField(max_length=200, null=True, default=None)
 
     types = ArrayField(
-        models.CharField(max_length=20, choices=PlaceType.choices()),
-        size=6,
+        models.CharField(max_length=30, choices=PlaceType.choices()),
+        size=16,
         default=default_type)
 
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, related_name='cities')
