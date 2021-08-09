@@ -83,6 +83,7 @@ class City(models.Model):
     def add_type(self, place_type: PlaceType):
         if place_type not in self.types:
             self.types.append(place_type)
+            print(self.types)
 
     def exclude_type(self, place_type: PlaceType):
         if place_type in self.types:
