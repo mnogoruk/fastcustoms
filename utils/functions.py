@@ -31,9 +31,9 @@ def place_type_related_to_route_type(r_type, flg):
             p_type = PlaceType.WAREHOUSE_DST.value
     elif r_type == RouteType.SEA.value:
         if flg == 's':
-            p_type = PlaceType.SEAPORT_SRC
+            p_type = PlaceType.SEAPORT_SRC.value
         else:
-            p_type = PlaceType.SEAPORT_DST
+            p_type = PlaceType.SEAPORT_DST.value
     else:
         p_type = PlaceType.default().value
 
