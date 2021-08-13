@@ -6,9 +6,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from order.models import Order
 from order.serializers import OrderSerializer
-from sendgrid import SendGridAPIClient, Attachment, FileContent, FileType, FileName, Disposition, ContentId
-from sendgrid import Mail
 from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
 from utils.enums import RouteType
 

@@ -193,4 +193,12 @@ SIMPLE_JWT = {
 
 TEST_RUNNER = 'test.common.runner.TestRunner'
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.timeweb.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'rates@formatlogistic.ru'
+EMAIL_HOST_PASSWORD = 'f279SFiU'
+DEFAULT_FROM_EMAIL = 'rates@formatlogistic.ru'
+
+
 django_heroku.settings(locals())
