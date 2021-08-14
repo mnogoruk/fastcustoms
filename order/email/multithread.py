@@ -4,7 +4,7 @@ from threading import Thread
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 
-email_html_template = get_template('email_oreder.html')
+email_html_template = get_template('email_order.html')
 email_text_template = get_template('order_email.txt')
 
 logger = logging.getLogger('order.email')
