@@ -1,7 +1,11 @@
+import logging
+
 from django.db import transaction
 
 from geo.models import City, Country, State
 import json
+
+logger = logging.getLogger('loading')
 
 
 def serialize_city(city: City):
@@ -63,9 +67,13 @@ def dump_all(filename):
 def load_all(filename):
     with open(filename, 'r', encoding='utf-8') as file:
         data = json.load(file)
+        logger.debug("START LOADING GEO")
+        c_count = 0
         with transaction.atomic():
             for country_data in data:
                 states = country_data.pop('states')
+                c_count += 1
+                logger.debug(f"load {country_data['name']} | {c_count}")
                 country = Country.objects.create(**country_data)
                 if len(states) > 0:
                     for state_data in states:
