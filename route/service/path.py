@@ -15,20 +15,6 @@ class PathCalculator:
         self.good = self.built_good(good_data=data.pop('good', {}))
         self.special = self.build_special(special_data=data.pop('special', {}))
 
-        print('------')
-        print(self.good)
-        print(self.good.boxes)
-        for box in self.good.boxes:
-            print('-')
-            print('\tlength:', box.length)
-            print('\theight:', box.height)
-            print('\twidth:', box.width)
-            print('\tvolume:', box.volume)
-            print('\tldm:', box.ldm)
-            print('\tmass:', box.mass)
-            print('-')
-        print('------')
-
     @classmethod
     def built_good(cls, good_data):
         boxes = []
@@ -69,9 +55,7 @@ class PathCalculator:
 
     def get_path_conclusion(self):
         paths = PathService.paths(self.source, self.destination, self.source_type, self.destination_type)
-        print('paths: ', paths)
         for path in paths:
-            print('path: ', path)
             PathService.calculate(path, self.good, self.special)
 
         return PathConclusion(source=self.source, destination=self.destination, paths=paths)

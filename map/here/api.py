@@ -1,5 +1,4 @@
 import json
-import sys
 from typing import Union, List, Optional, Dict
 
 import requests

@@ -123,8 +123,7 @@ class OrderViewSet(ModelViewSet):
             'good',
             'special'
         )
-        print(order_query.query)
-        return order_query.order_by(F('time_stamp').desc())[:10]
+        return order_query.order_by(F('time_stamp').desc())[:30]
 
 
 class CustomsEditView(APIView):

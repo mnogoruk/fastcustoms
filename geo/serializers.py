@@ -61,7 +61,7 @@ class CitySerializer(WithAliasSerializer):
 
     class Meta:
         model = City
-        fields = ['id', 'name', 'slug', 'state', 'location', 'types', 'alias_ru', 'alias_en']
+        fields = ['id', 'name', 'slug', 'state', 'location', 'alias_ru', 'alias_en']
 
 
 class CityShortSerializer(WithAliasSerializer):

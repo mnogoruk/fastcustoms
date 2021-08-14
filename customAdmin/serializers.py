@@ -174,7 +174,6 @@ class ZoneRatesAdminSerializer(ModelSerializer):
         zone = super(ZoneRatesAdminSerializer, self).create(validated_data)
         minimal_price = validated_data.pop('minimal_price')
         z = ZonePricingInfo.objects.create(zone=zone, minimal_price=minimal_price)
-        print(z)
         for rate in rates:
             ZoneRate.objects.create(**rate, zone=zone)
         zone.minimal_price = minimal_price
