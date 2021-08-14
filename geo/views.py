@@ -7,7 +7,6 @@ from rest_framework.viewsets import ModelViewSet
 from geo.filters import CityFilter, StateFilter
 from geo.models import Zone, Country, State, City
 from geo.serializers import ZoneSerializer, CountrySerializer, StateSerializer, CitySerializer, CityShortSerializer
-from utils.enums import PlaceType
 
 
 class ZoneViewSet(ModelViewSet):
@@ -27,7 +26,6 @@ class CountryViewSet(ModelViewSet):
 
         if isinstance(alias, str):
             alias = alias.split(',')
-        print(alias)
         serializer_class = self.get_serializer_class()
         kwargs.setdefault('context', self.get_serializer_context())
         return serializer_class(*args, alias=alias, **kwargs)

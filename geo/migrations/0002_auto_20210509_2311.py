@@ -12,10 +12,3 @@ class Migration(migrations.Migration):
     dependencies = [
         ('geo', '0001_initial'),
     ]
-
-    operations = [
-        migrations.RunPython(tes_load.from_json)
-    ] if not settings.TEST_RUN else \
-        [
-            migrations.RunPython(tes_load.from_json)
-        ]

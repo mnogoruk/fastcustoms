@@ -10,6 +10,7 @@ class Location:
     latitude: float
     longitude: float
 
+
 def default_type():
     return [PlaceType.default().value]
 

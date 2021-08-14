@@ -244,6 +244,17 @@ django-appconf = ">=1.0.2"
 measurement = ">=1.6,<4.0"
 
 [[package]]
+name = "django-request-logging"
+version = "0.7.3"
+description = "Django middleware that logs http request body."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Django = "*"
+
+[[package]]
 name = "djangorestframework"
 version = "3.12.4"
 description = "Web APIs for Django, made easy."
@@ -851,7 +862,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.8"
-content-hash = "152ed0e2b33c7de09e5d91dd4fca1213f813e3233fec7194d6ea5473ff937aa3"
+content-hash = "2739c406df9585c0da591a5c1dd90e44fec410c81abfd3f2fbf29deb4344b5a0"
 
 [metadata.files]
 appdirs = [
@@ -989,6 +1000,10 @@ django-heroku = [
 django-measurement = [
     {file = "django-measurement-3.2.3.tar.gz", hash = "sha256:8fda226239a4d4ac033270e5bbd5aa3595c1c817f47a657c83f343b492b88220"},
     {file = "django_measurement-3.2.3-py2.py3-none-any.whl", hash = "sha256:aca86e10dc603ea53595ca80aaa43824480342d969e469f4ec83b12df3bad65b"},
+]
+django-request-logging = [
+    {file = "django-request-logging-0.7.3.tar.gz", hash = "sha256:79adc371b6165e73a331304eac84feee61b9febcb369e4fbb6650a38387d97d2"},
+    {file = "django_request_logging-0.7.3-py2.py3-none-any.whl", hash = "sha256:382f42e05760296b822179548ab3991c869c777e92d3d791398816414aaade64"},
 ]
 djangorestframework = [
     {file = "djangorestframework-3.12.4-py3-none-any.whl", hash = "sha256:6d1d59f623a5ad0509fe0d6bfe93cbdfe17b8116ebc8eda86d45f6e16e819aaf"},

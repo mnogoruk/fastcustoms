@@ -38,8 +38,8 @@ class PathRouteCreatableSerializer(serializers.ModelSerializer):
 
 
 class PathRouteReadSerializer(serializers.Serializer):
-    source = CitySerializer(read_only=True)
-    destination = CitySerializer(read_only=True)
+    source = CityShortSerializer(read_only=True)
+    destination = CityShortSerializer(read_only=True)
 
     distance = serializers.FloatField(read_only=True)  # km
     duration = serializers.FloatField(read_only=True)  # days
@@ -79,8 +79,8 @@ class PathSerializer(serializers.Serializer):
 
 
 class PathConclusionSerializer(serializers.Serializer):
-    source = CitySerializer()
-    destination = CitySerializer()
+    source = CityShortSerializer()
+    destination = CityShortSerializer()
 
     paths = PathSerializer(many=True)
 

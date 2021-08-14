@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import Union, List
 
 from django.db import connection
@@ -13,6 +14,8 @@ from route.service.raw_queries import ROUTES_VIA_WAYPOINT_ZONE_QUERY
 from utils.enums import RouteType, RateType, PlaceType
 from route import models
 from django.core.exceptions import ObjectDoesNotExist
+
+logger = logging.getLogger('route.service')
 
 
 class PathService:
@@ -42,9 +45,6 @@ class PathService:
         # combine all it
         paths = cls.build_paths(source_route_data, destination_route_data, hub_routes, source, dest, source_type,
                                 destination_type)
-        print('paths')
-        print()
-        print(paths)
         return cls.excluded_circles(paths)
 
     @classmethod
@@ -75,19 +75,18 @@ class PathService:
 
         hub_routes_count = len(hub_routes)
 
-        print('BUILD PATHS\n-------------------')
         for i in range(hub_routes_count):
             if source_route_data[i][2] != 0 or destination_route_data[i][2] != 0:
                 # can't build path, because there is error in route matrix.
-                print('error in matrix')
+                logger.warning(f'error in distance matrix. {source.name}({source.id}) - {dest.name}({dest.id}) | '
+                               f'f{source_route_data} | '
+                               f'index: {i}')
                 continue
 
             path = dataclass.Path()
             hub_route = hub_routes[i]
-            print('hub_route: ', hub_route)
 
             if source_type == PlaceType.CITY.value:
-                print('source_type is CITY')
                 if hub_route[0].source_id != source.id:
                     begin_route = RouteInPath(
                         source=source,
@@ -98,7 +97,6 @@ class PathService:
                     begin_route.distance = source_route_data[i][0]
                     begin_route.duration = source_route_data[i][1]
                     path.routes.append(begin_route)
-                    print('begin route: ', begin_route)
 
                 else:
                     begin_route = RouteInPath(
@@ -110,7 +108,6 @@ class PathService:
                     begin_route.distance = 0
                     begin_route.duration = 0
                     path.routes.append(begin_route)
-                    print('begin route: ', begin_route)
 
             else:
                 if hub_route[0].source_id != source.id:
@@ -150,7 +147,6 @@ class PathService:
 
     @classmethod
     def calculate(cls, path: Union[dataclass.Path, models.Path], good: Good, special: Special = Special()):
-        print("CALCULATE")
         total_cost = 0
         total_duration = PathDuration(1, 1)
         total_distance = 0
@@ -170,17 +166,11 @@ class PathService:
             raise ValueError(
                 f"path must be route.service.models.Path or route.models.Path instance. Got {type(path)} instead"
             )
-        print('calculate routes')
         for route in routes:
-            print('\troute: ', route)
             if route.is_hub:
-                print('\tcost of hub route')
                 cost = cls.cost_of_hub_route(route, good)
-                print('\thub route cost: ', cost)
             else:
-                print('\tcost of auxiliary route')
                 cost = cls.cost_of_auxiliary_route(route, good)
-                print('\tauxiliary route cost: ', cost)
 
             total_cost += cost
             total_distance += route.distance
@@ -228,10 +218,7 @@ class PathService:
 
         routes = [(route,) for route in routes_query.all()]
 
-        print('routes strait: ', routes)
-
         routes_via_waypoint = cls.routes_via_waypoint_zone(source_zone, dest_zone, source_type, destination_type)
-        print('routes via waypoint: ', routes_via_waypoint)
 
         routes += routes_via_waypoint
         return routes
@@ -239,17 +226,11 @@ class PathService:
     @classmethod
     def cost_of_hub_route(cls, route: HubRoute, good: Good):
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good)
-        print('\t\tcost_ldm: ', cost_ldm)
-        print('\t\tcost_size: ', cost_size)
-        print('\t\tcost_mass: ', cost_mass)
         cost_service = cls.cost_by_services(route, good)
-        print('\t\tcost_service: ', cost_service)
         cost = max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
         if cost < float(route.minimal_price):
             cost = float(route.minimal_price)
-            print('\t\tuse minimal distance')
-            print(f'\t\tminimal cost: {route.minimal_price}')
-        print(f'\t\ttotal cost: {cost}')
+
         return cost
 
     @classmethod
@@ -259,15 +240,11 @@ class PathService:
         distance = route.distance
 
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good)
-        print('\t\tcost_ldm: ', cost_ldm)
-        print('\t\tcost_size: ', cost_size)
-        print('\t\tcost_mass: ', cost_mass)
+
         cost = max(cost_ldm, cost_size, cost_mass) * distance
         if cost < float(pricing_info.minimal_price):
             cost = float(pricing_info.minimal_price)
-            print('\t\tuse minimal distance')
-            print(f'\t\tminimal cost: {pricing_info.minimal_price}')
-        print(f'\t\ttotal cost: {cost}')
+
         return cost
 
     @classmethod
