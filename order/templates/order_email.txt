@@ -1,0 +1,31 @@
+Ваш заказ успешно создан!
+Информация о маршруте:
+{% for route in path.routes %}
+<{{ forloop.counter }}>
+-{% firstof route.source.alias_ru route.source.alias_en route.source.name %}
+{% if route.type == 'AIR' %}
+    Авиахрафт
+{% elif route.type == 'TRUCK' %}
+    {% if route.is_hub %}
+    Автомобильная перевозка
+{% elif forloop.counter == 0 %}
+    От двери
+    {% else %}
+    До двери
+    {% endif %}
+{% elif route.type == 'TRAIN' %}
+    Железнодорожная перевозка
+{% elif route.type == 'SEA' %}
+    Морская перевозка
+{% else %}
+    -
+{% endif %}
+-{% firstof route.destination.alias_ru route.destination.alias_en route.destination.name %}
+--------------
+{% endfor %}
+Информация о грузе:
+    {{ good.total_volume }} м^3
+    {{ good.total_mass }} кг
+    {{ path.total_cost }} €
+    {{ path.total_duration.min }}-{{ path.total_duration.max }} дней
+Связаться с нами по всем возникшим вопросам можно по почте: request@formatlogistic.ru

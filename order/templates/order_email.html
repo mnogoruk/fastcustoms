@@ -1,39 +1,132 @@
-<div>
-    {% for route in path.routes %}
-        <div style="font-family: 'Montserrat', sans-serif; display: flex; align-items: center; margin-bottom: 20px;">
-            <div style="border-radius: 50%; background-color: #35d2d2; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; margin-right: 40px; font-family: 'Montserrat', sans-serif; font-weight: 400; color: #f6fbf9;">{{ forloop.counter }}</div>
-            <div class="step-wrapper">
-                <div style="font-weight: 700; margin-bottom: 10px;">{{ route.source.name }}</div>
-                <div style="display: flex; justify-content: flex-start; align-items: center; font-family: 'Montserrat', sans-serif; font-weight: 400;">
-                    <div style="margin-bottom: 5px; margin-right: 10px; ">
-                        {% if route.type == 'TRUCK' %}
-                            <img style="width: 40px;" src="cid:truck.jpg" alt="truck"/>
-                        {% elif route.type == 'AIR' %}
-                            <img style="width: 40px;" src="cid:airplane.jpg" alt="airplane"/>
+<div style="
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        font-family: 'Roboto Light', sans-serif;">
+    <div style="
+        font-weight: 600;
+        font-size: 24px;
+        margin-bottom: 20px;">
+        Ваш заказ успешно создан!
+    </div>
+    <div style="
+        font-weight: 500;
+        opacity: .7;
+        font-size: 18px;
+        margin-bottom: 15px;">
+        Информация о маршруте
+    </div>
+    <div style="
+        display: flex;
+        justify-content: flex-start;
+        flex-direction: row;
+        margin-bottom: 20px;">
+        {% for route in path.routes %}
+            <div style="
+            display: flex;
+            align-items: center;
+            margin-right: 20px;">
+                <div style="
+                font-weight: 500;
+                margin-right: 10px;">{{ forloop.counter }}</div>
+                <div style="
+                display: flex;
+                justify-content: flex-start;
+                flex-direction: column;">
+                    <div style="
+                    font-weight: 700;
+                    font-size: 20px;
+                    margin-bottom: 5px;">{% firstof route.source.alias_ru route.source.alias_en route.source.name %}</div>
+                    <div style="
+                    margin-bottom: 5px;
+                    opacity: .7;
+                    font-size: 12px;">
+                        {% if route.type == 'AIR' %}
+                            Авиахрафт
+                        {% elif route.type == 'TRUCK' %}
+                            {% if route.is_hub %}
+                                Автомобильная перевозка
+                            {% elif forloop.counter == 1 %}
+                                От двери
+                            {% else %}
+                                До двери
+                            {% endif %}
                         {% elif route.type == 'TRAIN' %}
-                            <img style="width: 40px;" src="cid:train.jpg" alt="train"/>
+                            Железнодорожная перевозка
                         {% elif route.type == 'SEA' %}
-                            <img style="width: 40px;" src="cid:ship.jpg" alt="ship"/>
+                            Морская перевозка
+                        {% else %}
+                            -
                         {% endif %}
                     </div>
-                    <div style=" color: black; opacity: 0.4; font-size: 14px; margin-right: 10px;">{{ route.distance }}
-                        км
-                    </div>
+                    <div style="
+                    font-weight: 700;
+                    font-size: 20px;
+                    margin-bottom: 5px;">{% firstof route.destination.alias_ru route.destination.alias_en route.destination.name %}</div>
                 </div>
-                <div style=" font-weight: 700; margin-bottom: 5px;">{{ route.destination.name }}</div>
             </div>
+        {% endfor %}
+    </div>
+    <div style="
+        font-weight: 500;
+        opacity: .7;
+        font-size: 18px;
+        margin-bottom: 15px;">
+        Информация о грузе
+    </div>
+    <div style="
+        display: flex;
+        justify-content: flex-start;
+        flex-direction: row;
+        font-size: 14px;
+        margin-bottom: 20px;">
+        <div style="
+            display: flex;
+            flex-direction: row;
+            margin-right: 10px;">
+            <div>Расстояние:</div>
+            <div style="margin-left: 5px;">1000км</div>
         </div>
-    {% endfor %}
-    <div style="background-color: #f6fbf9;border-radius: 20px; width: 1000px; padding: 40px 30px; display: flex; flex-direction: row; justify-content: space-between; margin-bottom: 30px; font-family: 'Montserrat', sans-serif;">
-        <div style="font-weight: 600; font-size: 18px;">Итого:</div>
-        <div>Расстояние: {{ path.total_distance|floatformat:0 }} км</div>
-        <br>
-        <div>Цена: {{ path.total_cost|floatformat:2 }}€</div>
-        <br>
-        <div>Время в пути: {{ path.total_duration.min|floatformat:0 }} - {{ path.total_duration.max|floatformat:0 }} дней</div>
-        <br>
-        <div>Вес: {{ good.total_mass|floatformat:2 }}кг</div>
-        <br>
-        <div>Объем: {{ good.total_volume|floatformat:2 }} м³</div>
+        <div style="
+            display: flex;
+            flex-direction: row;
+            margin-right: 10px;">
+            <div>Объем:</div>
+            <div style="margin-left: 5px;">{{ good.total_volume }} м^3</div>
+        </div>
+        <div style="
+            display: flex;
+            flex-direction: row;
+            margin-right: 10px;">
+            <div>Вес:</div>
+            <div style="margin-left: 5px;">{{ good.total_mass }} кг</div>
+        </div>
+        <div style="
+            display: flex;
+            flex-direction: row;
+            margin-right: 10px;">
+            <div>Цена:</div>
+            <div style="margin-left: 5px;">{{ path.total_cost }} €</div>
+        </div>
+        <div style="
+            display: flex;
+            flex-direction: row;
+            margin-right: 10px;">
+            <div>Время в пути:</div>
+            <div style="margin-left: 5px;">{{ path.total_duration.min }}-{{ path.total_duration.max }} дней</div>
+        </div>
+    </div>
+    <div style="
+        font-size: 14px;
+        opacity: .7;
+        margin-bottom: 5px;">
+        Связаться с нами по всем возникшим вопросам можно по почте:
+    </div>
+
+    <div style="
+        font-size: 14px;
+        opacity: .7;
+        margin-bottom: 5px;">
+        request@formatlogistic.ru
     </div>
 </div>

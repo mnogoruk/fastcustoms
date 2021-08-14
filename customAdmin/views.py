@@ -112,6 +112,20 @@ class OrderViewSet(ModelViewSet):
     serializer_class = OrderAdminSerializer
     queryset = Order.objects.all()
 
+    def get_queryset(self):
+        order_query = Order.objects.prefetch_related(
+            'path__routes',
+            'path__routes__destination',
+            'path__routes__source',
+        ).select_related(
+            'agent',
+            'path',
+            'good',
+            'special'
+        )
+        print(order_query.query)
+        return order_query.order_by(F('time_stamp').desc())[:10]
+
 
 class CustomsEditView(APIView):
     permission_classes = (IsAuthenticated,)
