@@ -201,6 +201,8 @@ EMAIL_HOST_USER = 'rates@formatlogistic.ru'
 EMAIL_HOST_PASSWORD = 'f279SFiU'
 DEFAULT_FROM_EMAIL = 'rates@formatlogistic.ru'
 
+DEFAULT_ADMIN_EMAIL_RECIPIENT = os.environ.get('ADMIN_EMAIL', 'lionless072@gmail.com')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -243,6 +245,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
         },
+        'order.email': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        }
     },
 }
 

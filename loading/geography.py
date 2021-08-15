@@ -4,6 +4,7 @@ from django.db import transaction
 
 from geo.models import City, Country, State
 import json
+import pandas as pd
 
 logger = logging.getLogger('loading')
 
@@ -82,3 +83,12 @@ def load_all(filename):
                         if len(cities) > 0:
                             for city_data in cities:
                                 city = City.objects.create(**city_data, state=state)
+
+
+def states_to_csv():
+    data = []
+    for country in Country.objects.prefetch_related('states').all():
+        for state in country.states.all():
+            data.append([country.alias_ru, state.name])
+    df = pd.DataFrame(data, columns=['Country', 'state'])
+    df.to_csv('states.csv')
