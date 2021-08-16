@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNINsG: keep the secret key used in production secret!
-SECRET_KEY = 'wegrbehbfjenwigbejkrnbinsdbjneiurnbiuerwbjrknffjkn'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-DEBUG = True
+DEBUG = int(os.environ.get('DEBUG', 1))
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'

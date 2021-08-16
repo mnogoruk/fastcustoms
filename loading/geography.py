@@ -2,7 +2,7 @@ import logging
 
 from django.db import transaction
 
-from geo.models import City, Country, State
+from geo.models import City, Country, State, Zone
 import json
 import pandas as pd
 
@@ -91,4 +91,12 @@ def states_to_csv():
         for state in country.states.all():
             data.append([country.alias_ru, state.name])
     df = pd.DataFrame(data, columns=['Country', 'state'])
-    df.to_csv('states.csv')
+    df.to_csv('states.csv', encoding='utf-8')
+
+
+def associate_zones_to_countries():
+    for country in Country.objects.all():
+        if country.states.count() > 0:
+            zone = Zone.objects.create(name=country.name, slug=country.slug)
+            zone.associate_with_country(country)
+            zone.save()
