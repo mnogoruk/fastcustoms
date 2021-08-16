@@ -85,13 +85,13 @@ def load_all(filename):
                                 city = City.objects.create(**city_data, state=state)
 
 
-def states_to_csv():
+def states_to_exel():
     data = []
     for country in Country.objects.prefetch_related('states').all():
         for state in country.states.all():
             data.append([country.alias_ru, state.name])
     df = pd.DataFrame(data, columns=['Country', 'state'])
-    df.to_csv('states.csv', encoding='utf-8')
+    df.to_excel('states.xlsx', encoding='utf-8')
 
 
 def associate_zones_to_countries():

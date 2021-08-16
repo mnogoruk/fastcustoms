@@ -44,3 +44,4 @@ django~=3.2.3
 djangorestframework~=3.12.4
 requests~=2.25.1
 herepy~=3.5.2
+openpyxl==3.0.7
