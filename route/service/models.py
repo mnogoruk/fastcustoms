@@ -42,11 +42,11 @@ class Box:
 
     @property
     def volume(self):
-        return self.length * self.width * self.height * self.amount
+        return self.length * self.width * self.height
 
     @property
     def ldm(self):
-        return ldm_from_size(length=self.length, width=self.width, height=self.height) * self.amount
+        return ldm_from_size(length=self.length, width=self.width, height=self.height)
 
 
 @dataclass
