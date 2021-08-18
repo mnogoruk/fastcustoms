@@ -151,6 +151,8 @@ class PathService:
         total_duration = PathDuration(1, 1)
         total_distance = 0
 
+        logger.info({'calculate': {'good': good}})
+
         if special.departure_date is None:
             departure_date_best = datetime.date.today()
             departure_date_worst = datetime.date.today()
@@ -169,8 +171,10 @@ class PathService:
         for route in routes:
             if route.is_hub:
                 cost = cls.cost_of_hub_route(route, good)
+                logger.info({'calculate': {'cost_of_hub_route': cost}})
             else:
                 cost = cls.cost_of_auxiliary_route(route, good)
+                logger.info({'calculate': {'cost_of_auxiliary_route': cost}})
 
             total_cost += cost
             total_distance += route.distance
@@ -226,7 +230,10 @@ class PathService:
     @classmethod
     def cost_of_hub_route(cls, route: HubRoute, good: Good):
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good)
+        logger.info({'cost_of_hub_route': {'cost_ldm': cost_ldm, 'cost_size': cost_size, 'cost_mass': cost_mass,
+                                           'route': route}})
         cost_service = cls.cost_by_services(route, good)
+        logger.info({'cost_of_hub_route': {'cost_service': cost_service}})
         cost = max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
         if cost < float(route.minimal_price):
             cost = float(route.minimal_price)
@@ -240,6 +247,8 @@ class PathService:
         distance = route.distance
 
         cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good)
+        logger.info({'cost_of_auxiliary_route': {'cost_ldm': cost_ldm, 'cost_size': cost_size, 'cost_mass': cost_mass,
+                                                 'route': route}})
 
         cost = max(cost_ldm, cost_size, cost_mass) * distance
         if cost < float(pricing_info.minimal_price):
