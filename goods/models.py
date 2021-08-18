@@ -40,12 +40,12 @@ class Box(models.Model):
     @property
     def volume(self):
         # meters cubes
-        return self.length * self.width * self.height * self.amount
+        return self.length * self.width * self.height
 
     @property
     def ldm(self):
         # ldm
-        return ldm_from_size(length=self.length, width=self.width, height=self.height) * self.amount
+        return ldm_from_size(length=self.length, width=self.width, height=self.height)
 
 
 class Container(models.Model):
