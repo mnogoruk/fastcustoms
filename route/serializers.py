@@ -62,7 +62,7 @@ class HubRouteShortSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HubRoute
-        fields = ['id', 'source', 'destination', 'type']
+        fields = ['id', 'source', 'destination', 'type', 'title', 'active', 'rates_valid_to']
 
 
 class DurationSerializer(serializers.Serializer):

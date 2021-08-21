@@ -8,6 +8,7 @@ FROM (
     INNER JOIN geo_zone z ON s.zone_id = z.id
     WHERE z.id = %s
     AND %s = ANY(c.types)
+    AND hr.active = true
     ) routes1
 INNER JOIN (
     SELECT hr.id, hr.source_id
@@ -17,6 +18,8 @@ INNER JOIN (
     INNER JOIN geo_zone z ON s.zone_id = z.id
     WHERE z.id = %s
     AND %s = ANY(c.types)
+    AND hr.active = true
 ) routes2
+
 ON (routes1.destination_id = routes2.source_id)
 """

@@ -4,8 +4,8 @@ from random import choice
 from django.db import transaction
 from rest_framework.serializers import ValidationError, ModelSerializer
 from rest_framework import serializers
-from geo.models import City, Zone
-from geo.serializers import ZoneShortSerializer
+from geo.models import City, Zone, Country, State
+from geo.serializers import ZoneShortSerializer, CitySerializer, ZoneSerializer, CountrySerializer, StateSerializer
 from order.serializers import OrderSerializer
 from pricing.models import RouteRate, ZoneRate, ServiceAdditional, ServiceRanked, ZonePricingInfo
 from pricing.serializers import ZoneRateSerializer, ServiceRankedSerializer, ServiceAdditionalSerializer, \
@@ -14,9 +14,38 @@ from route.models import HubRoute, RouteTimeTable
 from route.serializers import HubRouteSerializer, RouteTimeTableSerializer
 from utils.enums import RouteType, PlaceType
 from utils.functions import place_type_related_to_route_type
+from utils.serializers.fileds import PureLookUpFiled
+
+
+class AdminZoneSerializer(ZoneSerializer):
+    pass
+
+
+class AdminCountrySerializer(CountrySerializer):
+    pass
+
+
+class AdminStateSerializer(StateSerializer):
+    country = AdminCountrySerializer()
+    zone = AdminZoneSerializer()
+
+    class Meta:
+        model = State
+        fields = ['id', 'name', 'slug', 'code', 'country', 'zone']
+
+
+class AdminCitySerializer(CitySerializer):
+    state = AdminStateSerializer()
+
+    class Meta:
+        model = City
+        fields = ['id', 'name', 'slug', 'state', 'location', 'alias_ru', 'alias_en']
 
 
 class HubRouteAdminSerializer(HubRouteSerializer):
+    source = PureLookUpFiled(AdminCitySerializer(), lookup_fields=['id', 'slug'])
+    destination = PureLookUpFiled(AdminCitySerializer(), lookup_fields=['id', 'slug'])
+
     additional_services = ServiceAdditionalSerializer(many=True, required=False)
     ranked_services = ServiceRankedSerializer(many=True, required=False)
     rates = RouteRateSerializer(many=True)
