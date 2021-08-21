@@ -55,5 +55,5 @@ class EmailThread(Thread):
                 logger.error(f'Error while sending email to {self.recipient_list}:\n{ex}')
 
 
-def send_order_email(subject, context, recipient_list):
-    EmailThread(subject, context, recipient_list).start()
+def send_order_email(subject, context, recipient_list, send_client=True):
+    EmailThread(subject, context, recipient_list, send_client).start()

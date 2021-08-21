@@ -17,13 +17,15 @@ class OrderViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        if serializer.data['special']['send_mail']:
-            mail_to = serializer.data['agent']['email']
-            path = serializer.data['path']
-            good = serializer.data['good']
-            client = serializer.data['agent']
-            order_info = {'customs': serializer.data['customs']}
-            context = {'good': good, 'path': path, 'clint': client, 'order': order_info}
-            send_order_email('Заказ на Formatlogistic', context, [mail_to])
+
+        mail_to = serializer.data['agent']['email']
+        path = serializer.data['path']
+        good = serializer.data['good']
+        client = serializer.data['agent']
+        order_info = {'customs': serializer.data['customs']}
+        context = {'good': good, 'path': path, 'client': client, 'order': order_info}
+
+        send_order_email('Заказ на Formatlogistic', context, [mail_to],
+                         send_client=serializer.data['special']['send_mail'])
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
