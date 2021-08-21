@@ -9,8 +9,8 @@ from route.models import Path
 
 
 class OrderAgent(models.Model):
-    company_name = models.CharField(max_length=250)
-    phone = models.CharField(max_length=50)
+    company_name = models.CharField(max_length=250, null=True)
+    phone = models.CharField(max_length=50, null=True)
     email = models.EmailField(max_length=120)
     comment = models.TextField(max_length=1000, default='')
 
