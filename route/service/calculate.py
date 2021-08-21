@@ -205,7 +205,7 @@ class PathService:
         source_zone = source.state.zone
         dest_zone = dest.state.zone
 
-        routes_query = HubRoute.objects
+        routes_query = HubRoute.objects.filter(active=True)
 
         if source_zone is None or dest_zone is None:
             return []

@@ -10,6 +10,9 @@ from route.managers import HubRouteManager, PathCreatableManager
 from utils.enums import RouteType
 from utils.db.models import AbstractCreate
 from utils.functions import circle_search
+from datetime import date
+
+MAX_DATE = date.max
 
 
 class RouteTimeTable(models.Model):
@@ -34,6 +37,11 @@ class HubRoute(AbstractCreate):
     minimal_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)  # euro
     distance = models.FloatField()  # km
     duration = models.FloatField()  # days
+
+    active = models.BooleanField(default=True)
+    rates_valid_to = models.DateField(null=True, default=MAX_DATE)
+
+    title = models.CharField(max_length=255, blank=True, default='')
 
     is_hub = True
 

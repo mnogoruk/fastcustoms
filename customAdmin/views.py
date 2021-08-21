@@ -21,14 +21,17 @@ from route.serializers import HubRouteShortSerializer
 class RouteView(ModelViewSet, FullnessMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = HubRouteAdminSerializer
-    queryset = HubRoute.objects.all()
+    queryset = HubRoute.objects.select_related(
+        'source', 'source__state', 'source__state__country', 'source__state__zone',
+        'destination', 'destination__state', 'destination__state__country', 'destination__state__zone'
+    )
 
     def get_queryset(self):
         fullness = self.fullness()
         if fullness == self.FullnessMode.FULL:
-            return super().get_queryset().select_related('source', 'destination', 'timetable')
+            return super().get_queryset().select_related('timetable')
         if fullness == self.FullnessMode.SHORT:
-            return super().get_queryset().select_related('source', 'destination')
+            return super().get_queryset()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
