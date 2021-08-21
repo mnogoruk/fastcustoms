@@ -21,7 +21,9 @@ class OrderViewSet(ModelViewSet):
             mail_to = serializer.data['agent']['email']
             path = serializer.data['path']
             good = serializer.data['good']
-            context = {'good': good, 'path': path}
+            client = serializer.data['agent']
+            order_info = {'customs': serializer.data['customs']}
+            context = {'good': good, 'path': path, 'clint': client, 'order': order_info}
             send_order_email('Заказ на Formatlogistic', context, [mail_to])
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

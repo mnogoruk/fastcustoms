@@ -116,6 +116,33 @@
         </td>
     </tr>
     <tr>
+        <td>
+            <table width="600" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr>
+                        <td>
+                            Контакты заказачика: {{ clinet.email }} {{ clinet.phone }}
+                        </td>
+                        <td>
+                            Компания: {{ client.company_name }}
+                        </td>
+                        <td>
+                            Дополнительная информация: {{ client.comment }}
+                        </td>
+                        <td>
+                            Томоженное оформление:
+                            {% if order.customs %}
+                                Да
+                            {% else %}
+                                Нет
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    <tr>
         <td style="font-size: 0; line-height: 0;" height="15">&nbsp;</td>
     </tr>
     <tr>
