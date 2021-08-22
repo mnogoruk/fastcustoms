@@ -14,10 +14,11 @@ logger = logging.getLogger('order.email')
 
 
 class EmailThread(Thread):
-    def __init__(self, subject, context, recipient_list):
+    def __init__(self, subject, context, recipient_list, send_client=True):
         self.subject = subject
         self.recipient_list = recipient_list
         self.context = context
+        self.send_client = send_client
         Thread.__init__(self)
 
     def run(self):
@@ -39,7 +40,6 @@ class EmailThread(Thread):
                                              from_email=f'Formatlogistic <{settings.DEFAULT_FROM_EMAIL}>')
         email_admin.attach_alternative(html_email_admin_content, 'text/html')
         email_admin.to = [f'{settings.DEFAULT_ADMIN_EMAIL_RECIPIENT}']
-        print(settings.DEFAULT_ADMIN_EMAIL_RECIPIENT)
 
         try:
             email_admin.send()
@@ -47,12 +47,13 @@ class EmailThread(Thread):
         except Exception as ex:
             logger.error(f'Error while sending email to {settings.DEFAULT_ADMIN_EMAIL_RECIPIENT}:\n{ex}')
 
-        try:
-            email.send()
-            logger.info(f"Email send success {self.recipient_list}")
-        except Exception as ex:
-            logger.error(f'Error while sending email to {self.recipient_list}:\n{ex}')
+        if self.send_client:
+            try:
+                email.send()
+                logger.info(f"Email send success {self.recipient_list}")
+            except Exception as ex:
+                logger.error(f'Error while sending email to {self.recipient_list}:\n{ex}')
 
 
-def send_order_email(subject, context, recipient_list):
-    EmailThread(subject, context, recipient_list).start()
+def send_order_email(subject, context, recipient_list, send_client=True):
+    EmailThread(subject, context, recipient_list, send_client).start()
