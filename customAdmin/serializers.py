@@ -11,7 +11,7 @@ from pricing.models import RouteRate, ZoneRate, ServiceAdditional, ServiceRanked
 from pricing.serializers import ZoneRateSerializer, ServiceRankedSerializer, ServiceAdditionalSerializer, \
     RouteRateSerializer
 from route.models import HubRoute, RouteTimeTable
-from route.serializers import HubRouteSerializer, RouteTimeTableSerializer
+from route.serializers import HubRouteSerializer, RouteTimeTableSerializer, HubRouteShortSerializer
 from utils.enums import RouteType, PlaceType
 from utils.functions import place_type_related_to_route_type
 from utils.serializers.fileds import PureLookUpFiled
@@ -40,6 +40,11 @@ class AdminCitySerializer(CitySerializer):
     class Meta:
         model = City
         fields = ['id', 'name', 'slug', 'state', 'location', 'alias_ru', 'alias_en']
+
+
+class HubRouteShortAdminSerializer(HubRouteShortSerializer):
+    source = AdminCitySerializer()
+    destination = AdminCitySerializer()
 
 
 class HubRouteAdminSerializer(HubRouteSerializer):

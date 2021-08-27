@@ -9,7 +9,7 @@ from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_2
 
 from common.models import Customs
 from customAdmin.serializers import HubRouteAdminSerializer, ZoneRatesAdminSerializer, OrderAdminSerializer, \
-    ZoneCreateSerializer
+    ZoneCreateSerializer, HubRouteShortAdminSerializer
 from geo.models import Zone, State
 from geo.serializers import ZoneSerializer, ZoneShortSerializer
 from order.models import Order
@@ -40,7 +40,7 @@ class RouteView(ModelViewSet, FullnessMixin):
         if fullness == self.FullnessMode.FULL:
             return HubRouteAdminSerializer
         else:
-            return HubRouteShortSerializer
+            return HubRouteShortAdminSerializer
 
 
 class ZoneViewSet(ModelViewSet):
