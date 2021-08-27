@@ -40,6 +40,7 @@ class HubRoute(AbstractCreate):
 
     active = models.BooleanField(default=True)
     rates_valid_to = models.DateField(null=True, default=MAX_DATE)
+    description = models.TextField(max_length=1000, default='', blank=True)
 
     title = models.CharField(max_length=255, blank=True, default='')
 
@@ -82,6 +83,8 @@ class RouteInPath(AbstractCreate):
     type = models.CharField(max_length=20, default=RouteType.TRUCK.value, choices=RouteType.choices())
 
     path = models.ForeignKey(Path, on_delete=models.CASCADE, related_name='routes', null=True)
+
+    description = models.TextField(max_length=1000, default='', blank=True)
 
     _distance = models.FloatField(null=True)  # km
     _duration = models.FloatField(null=True)  # days
