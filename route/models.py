@@ -44,6 +44,9 @@ class HubRoute(AbstractCreate):
 
     title = models.CharField(max_length=255, blank=True, default='')
 
+    source_is_storage = models.BooleanField(default=False)
+    destination_is_storage = models.BooleanField(default=False)
+
     is_hub = True
 
     objects = HubRouteManager()
