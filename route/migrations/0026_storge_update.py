@@ -17,4 +17,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(update_storage)
     ]

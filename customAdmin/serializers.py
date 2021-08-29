@@ -97,9 +97,8 @@ class HubRouteAdminSerializer(HubRouteSerializer):
         return rates
 
     def validate(self, attrs):
-        if attrs['source_type'] == RouteType.TRUCK.value:
+        if attrs['type'] == RouteType.TRUCK.value:
             attrs['source_is_storage'] = True
-        if attrs['destination_type'] == RouteType.TRUCK.value:
             attrs['destination_is_storage'] = True
 
         return attrs
@@ -170,6 +169,22 @@ class HubRouteAdminSerializer(HubRouteSerializer):
             for service in validated_data.pop('ranked_services'):
                 ServiceRanked.objects.create(**service, route=route)
 
+        if not validated_data['source_is_storage'] and route.source_is_storage:
+            src_count = HubRoute.objects.filter(source=route.source, source_is_storage=True).count()
+            if src_count <= 1:
+                route.source.exclude_type(PlaceType.WAREHOUSE_SRC.value)
+
+        if validated_data['source_is_storage']:
+            route.source.add_type(PlaceType.WAREHOUSE_SRC.value)
+
+        if not validated_data['destination_is_storage'] and route.destination_is_storage:
+            dst_count = HubRoute.objects.filter(destination=route.destination, destination_is_storage=True).count()
+            if dst_count <= 1:
+                route.destination.exclude_type(PlaceType.WAREHOUSE_DST.value)
+
+        if validated_data['destination_is_storage']:
+            route.destination.add_type(PlaceType.WAREHOUSE_DST.value)
+
         if route.type != validated_data.get('type', RouteType.default().value):
 
             old_r_type = route.type
@@ -188,23 +203,13 @@ class HubRouteAdminSerializer(HubRouteSerializer):
                 if src_count <= 1:
                     route.source.exclude_type(old_p_type_s)
 
-            if not validated_data['source_is_storage'] and route.source_is_storage:
-                src_count = HubRoute.objects.filter(source=route.source, source_is_storage=True).count()
-                if src_count <= 1:
-                    route.source.exclude_type(PlaceType.WAREHOUSE_SRC.value)
-
             if old_p_type_d != PlaceType.CITY.value:
                 dst_count = HubRoute.objects.dst_count_by_type(dest=route.destination, r_type=old_r_type)
                 if dst_count <= 1:
                     route.destination.exclude_type(old_p_type_d)
 
-            if not validated_data['destination_is_storage'] and route.destination_is_storage:
-                dst_count = HubRoute.objects.filter(source=route.destination, destination_is_storage=True).count()
-                if dst_count <= 1:
-                    route.destination.exclude_type(PlaceType.WAREHOUSE_DST.value)
-
-            route.source.save()
-            route.destination.save()
+        route.source.save()
+        route.destination.save()
 
         return super(HubRouteAdminSerializer, self).update(route, validated_data)
 
