@@ -46,7 +46,7 @@ class RouteView(ModelViewSet, FullnessMixin):
 class ZoneViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ZoneRatesAdminSerializer
-    queryset = Zone.objects.all()
+    queryset = Zone.objects.annotate().all()
 
     @action(detail=False, methods=['get'], name='Zone summary', url_path='summary', url_name='zone-summary')
     def zone_summary(self, request):

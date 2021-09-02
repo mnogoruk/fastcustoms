@@ -237,8 +237,8 @@ class PathService:
         cost = max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
         if cost < float(route.minimal_price):
             cost = float(route.minimal_price)
-
-        return cost
+        price = cost * route.markup
+        return price
 
     @classmethod
     def cost_of_auxiliary_route(cls, route: RouteInPath, good: Good):
@@ -253,8 +253,8 @@ class PathService:
         cost = max(cost_ldm, cost_size, cost_mass) * distance
         if cost < float(pricing_info.minimal_price):
             cost = float(pricing_info.minimal_price)
-
-        return cost
+        price = cost * pricing_info.markup
+        return price
 
     @classmethod
     def routes_via_waypoint_zone(cls, source_zone, destination_zone, source_type=PlaceType.default().value,
