@@ -30,7 +30,7 @@ DEBUG = int(os.environ.get('DEBUG', 1))
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(' ')
 
 # Application definition
 INSTALLED_APPS = [
@@ -192,13 +192,13 @@ SIMPLE_JWT = {
 TEST_RUNNER = 'test.common.runner.TestRunner'
 
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.timeweb.ru'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = 'rates@formatlogistic.ru'
-EMAIL_HOST_PASSWORD = 'f279SFiU'
-DEFAULT_FROM_EMAIL = 'rates@formatlogistic.ru'
+EMAIL_HOST = os.environ.get('EMAIL_SMTP_SERVER')
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER')
 
-DEFAULT_ADMIN_EMAIL_RECIPIENT = os.environ.get('ADMIN_EMAIL', 'lionless072@gmail.com')
+DEFAULT_ADMIN_EMAIL_RECIPIENT = os.environ.get('ADMIN_EMAIL')
 
 LOGGING = {
     'version': 1,
