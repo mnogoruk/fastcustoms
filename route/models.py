@@ -46,6 +46,7 @@ class HubRoute(AbstractCreate):
 
     source_is_storage = models.BooleanField(default=False)
     destination_is_storage = models.BooleanField(default=False)
+    markup = models.FloatField(default=1)
 
     is_hub = True
 

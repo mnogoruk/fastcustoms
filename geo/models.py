@@ -39,6 +39,10 @@ class Zone(models.Model):
     def minimal_price(self):
         return self.pricing_info.minimal_price
 
+    @property
+    def markup(self):
+        return self.pricing_info.markup
+
     def associate_with_country(self, country):
         """ Just add all country states to zone. """
         with transaction.atomic():
