@@ -105,10 +105,10 @@ WSGI_APPLICATION = 'fastcustoms.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'fastcustoms',
-        'USER': 'postgres',
-        'PASSWORD': '1',
-        'PORT': 5432
+        'NAME': os.environ['SQL_DATABASE'],
+        'USER': os.environ['SQL_USER'],
+        'PASSWORD': os.environ['SQL_PASSWORD'],
+        'PORT': os.environ['SQL_PORT']
     }
 }
 
