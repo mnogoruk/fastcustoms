@@ -26,6 +26,22 @@ class RouteView(ModelViewSet, FullnessMixin):
         'destination', 'destination__state', 'destination__state__country', 'destination__state__zone'
     )
 
+    @action(detail=True, methods=['patch'], name='Active management', url_name='set-active', url_path='active')
+    def set_active(self, request, pk):
+        route = HubRoute.objects.get(pk=pk)
+        try:
+            active = request.data['active']
+        except KeyError:
+            body = {'active': 'active is required'}
+            return Response(data=body, status=HTTP_400_BAD_REQUEST)
+        if type(active) != bool:
+            body = {'active': 'active must be bool value'}
+            return Response(data=body, status=HTTP_400_BAD_REQUEST)
+
+        route.active = active
+        route.save()
+        return Response(status=HTTP_200_OK)
+
     def get_queryset(self):
         fullness = self.fullness()
         if fullness == self.FullnessMode.FULL:
