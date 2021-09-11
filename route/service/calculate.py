@@ -26,7 +26,7 @@ class PathService:
         cls.API_CLASS = api_class
 
     @classmethod
-    def paths(cls, source: City, dest: City, source_type, destination_type) -> list:
+    def paths(cls, source: City, dest: City, source_type, destination_type) -> List[dataclass.Path]:
 
         # better if source and dest objects all have prefetched zone instance
         hub_routes = cls.hub_routes(source, dest, source_type, destination_type)
@@ -69,7 +69,7 @@ class PathService:
                     dest,
                     source_type,
                     destination_type
-                    ) -> list:
+                    ) -> List[dataclass.Path]:
 
         paths = []
 

@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-
 from geo.models import City
 from geo.serializers import CitySerializer, CityShortSerializer
 from goods.serializers import GoodSerializer
@@ -74,6 +73,8 @@ class PathSerializer(serializers.Serializer):
     total_distance = serializers.FloatField()  # km
     total_duration = DurationSerializer()  # pair in days
     total_cost = serializers.DecimalField(max_digits=12, decimal_places=2)
+    fastest = serializers.BooleanField(default=False)
+    cheapest = serializers.BooleanField(default=False)
 
     routes = PathRouteReadSerializer(many=True)
 
