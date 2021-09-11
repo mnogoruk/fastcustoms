@@ -19,7 +19,22 @@ class Path:
     total_duration: PathDuration = PathDuration(0, 0)  # pair in days
     total_cost: float = 0  # euro
 
+    fastest: bool = False
+    cheapest: bool = False
+
     routes: List[Union[HubRoute, RouteInPath]] = field(default_factory=list)
+
+    def __eq__(self, other: 'Path'):
+        # simple eq
+        if self.total_distance != other.total_distance:
+            return False
+        if self.total_duration != other.total_duration:
+            return False
+        if self.total_cost != other.total_cost:
+            return False
+        if len(self.routes) != len(other.routes):
+            return False
+        return True
 
 
 @dataclass
