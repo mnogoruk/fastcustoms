@@ -72,6 +72,9 @@ class Path(models.Model):
     total_duration_max = models.FloatField(default=0)  # days
     total_cost = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
+    fastest = models.BooleanField(default=False)
+    cheapest = models.BooleanField(default=False)
+
     creatable = PathCreatableManager()
     objects = Manager()
 
