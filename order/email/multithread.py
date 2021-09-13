@@ -46,6 +46,7 @@ class EmailThread(Thread):
             logger.info(f"Email send success {settings.DEFAULT_ADMIN_EMAIL_RECIPIENT}")
         except Exception as ex:
             logger.error(f'Error while sending email to {settings.DEFAULT_ADMIN_EMAIL_RECIPIENT}:\n{ex}')
+            raise ex
 
         if self.send_client:
             try:
@@ -53,6 +54,7 @@ class EmailThread(Thread):
                 logger.info(f"Email send success {self.recipient_list}")
             except Exception as ex:
                 logger.error(f'Error while sending email to {self.recipient_list}:\n{ex}')
+                raise ex
 
 
 def send_order_email(subject, context, recipient_list, send_client=True):
