@@ -38,12 +38,12 @@ HubRouteManager = HubRouteBaseManager.from_queryset(HubRouteQuerySet)
 
 class PathCreatableManager(Manager):
 
-    def create(self, total_distance, total_duration, total_cost, routes):
+    def create(self, total_distance, total_duration, total_cost, routes, **kwargs):
         with transaction.atomic():
             path = self.model.objects.create(total_distance=total_distance,
                                              total_duration_min=total_duration['min'],
                                              total_duration_max=total_duration['max'],
-                                             total_cost=total_cost)
+                                             total_cost=total_cost, **kwargs)
             for route_data in routes:
                 if not route_data['is_hub']:
                     route_data.pop('distance')
