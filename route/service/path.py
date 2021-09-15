@@ -67,6 +67,11 @@ class PathCalculator:
     def sort_paths(self, paths: List[Path]):
         if len(paths) == 0:
             return paths
+        elif len(paths) == 1:
+            path = paths[0]
+            path.fastest = True
+            path.cheapest = True
+            path.optimal = True
 
         fastest = paths[0]
         cheapest = paths[0]
@@ -78,6 +83,14 @@ class PathCalculator:
         total_cost = 0
         total_duration = 0
 
+        for p in paths:
+            total_cost += p.total_cost
+            total_duration += p.total_duration.max
+
+        avg_cost = total_cost / len(paths)
+        avg_duration = total_duration / len(paths)
+        paths = sorted(paths, key=lambda p: sort_func(p, avg_cost, avg_duration))
+
         for ind, path in enumerate(paths):
             if path.total_cost < cheapest.total_cost:
                 cheapest = path
@@ -86,32 +99,32 @@ class PathCalculator:
                 fastest = path
                 fastest_ind = ind
 
-            total_cost += path.total_cost
-            total_duration += path.total_duration.max
-
-        if fastest_ind == cheapest_ind:
-            paths.pop(fastest_ind)
-        elif fastest_ind > cheapest_ind:
-            paths.pop(fastest_ind)
-            paths.pop(cheapest_ind)
-        else:
-            paths.pop(cheapest_ind)
-            paths.pop(fastest_ind)
-
-        fastest.fastest = True
         cheapest.cheapest = True
-        if len(paths) == 0:
-            others = []
-        else:
-            avg_cost = total_cost / len(paths)
-            avg_duration = total_duration / len(paths)
+        fastest.fastest = True
 
-            others = sorted(paths, key=lambda p: sort_func(p, avg_cost, avg_duration))
+        if len(paths) > 2:
+            paths[0].optimal = True
 
-        if fastest_ind == cheapest_ind:
-            return [fastest, *others]
+        if cheapest_ind == fastest_ind:
+            if cheapest_ind > 0:
+                paths.pop(cheapest_ind)
+                return [paths[0], cheapest, *paths[1:]]
+            else:
+                return paths
+        elif cheapest_ind > fastest_ind:
+            paths.pop(cheapest_ind)
+            paths.pop(fastest_ind)
+            if fastest_ind > 0:
+                return [paths[0], cheapest, fastest, *paths[1:]]
+            else:
+                return [fastest, cheapest, *paths]
         else:
-            return [fastest, cheapest, *others]
+            paths.pop(fastest_ind)
+            paths.pop(cheapest_ind)
+            if cheapest_ind > 0:
+                return [paths[0], cheapest, fastest, *paths[1:]]
+            else:
+                return [cheapest, fastest, *paths]
 
     def get_path_conclusion(self):
         paths = PathService.paths(self.source, self.destination, self.source_type, self.destination_type)

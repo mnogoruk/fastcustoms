@@ -12,7 +12,7 @@ class AbstractRate(AbstractCreate):
 
     price_per_unit = models.DecimalField(max_digits=20, decimal_places=8)
     currency = models.CharField(max_length=12, default=Currency.EURO.value)
-
+    minimal_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     type = models.CharField(choices=RateType.choices(), max_length=20)
 
     class Meta:
@@ -63,5 +63,4 @@ class ServiceRanked(AbstractCreate):
 
 class ZonePricingInfo(models.Model):
     zone = models.OneToOneField(Zone, on_delete=models.CASCADE, related_name='pricing_info')
-    minimal_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)  # euro
     markup = models.FloatField(default=1)

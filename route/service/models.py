@@ -21,6 +21,7 @@ class Path:
 
     fastest: bool = False
     cheapest: bool = False
+    optimal: bool = False
 
     routes: List[Union[HubRoute, RouteInPath]] = field(default_factory=list)
 

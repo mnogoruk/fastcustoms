@@ -36,10 +36,6 @@ class Zone(models.Model):
     code = models.CharField(max_length=5, null=True)
 
     @property
-    def minimal_price(self):
-        return self.pricing_info.minimal_price
-
-    @property
     def markup(self):
         return self.pricing_info.markup
 

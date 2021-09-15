@@ -235,8 +235,6 @@ class PathService:
         cost_service = cls.cost_by_services(route, good)
         logger.info({'cost_of_hub_route': {'cost_service': cost_service}})
         cost = max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
-        if cost < float(route.minimal_price):
-            cost = float(route.minimal_price)
         price = cost * route.markup
         return price
 
@@ -251,8 +249,6 @@ class PathService:
                                                  'route': route}})
 
         cost = max(cost_ldm, cost_size, cost_mass) * distance
-        if cost < float(pricing_info.minimal_price):
-            cost = float(pricing_info.minimal_price)
         price = cost * pricing_info.markup
         return price
 
@@ -300,6 +296,8 @@ class PathService:
             cost_ldm = 0
         else:
             cost_ldm = float(rate_ldm.price_per_unit) * good.total_ldm
+            if cost_ldm < rate_ldm.minimal_price:
+                cost_ldm = rate_ldm.minimal_price
         try:
             rate_size = ratable.rates.get(
                 range_from__lte=good.total_volume,
@@ -310,6 +308,8 @@ class PathService:
             cost_size = 0
         else:
             cost_size = float(rate_size.price_per_unit) * good.total_volume
+            if cost_size < rate_size.minimal_price:
+                cost_size = rate_size.minimal_price
         try:
             rate_mass = ratable.rates.get(
                 range_from__lte=good.total_mass,
@@ -320,4 +320,6 @@ class PathService:
             cost_mass = 0
         else:
             cost_mass = float(rate_mass.price_per_unit) * good.total_mass
+            if cost_mass < rate_mass.minimal_price:
+                cost_mass = rate_mass.minimal_price
         return cost_ldm, cost_size, cost_mass
