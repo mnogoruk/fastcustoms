@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'goods',
     'order',
     'customAdmin',
-    'common'
+    'common',
+    'report',
 ]
 CACHES = {
     'default': {
@@ -252,5 +253,6 @@ LOGGING = {
 
 # logging.config.dictConfig(LOGGING)
 REQUEST_LOGGING_ENABLE_COLORIZE = False
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 django_heroku.settings(locals(), logging=False)

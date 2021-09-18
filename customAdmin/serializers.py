@@ -220,10 +220,7 @@ class HubRouteAdminSerializer(HubRouteSerializer):
 
 class ZoneRatesAdminSerializer(ModelSerializer):
     rates = ZoneRateSerializer(many=True)
-    minimal_price = serializers.DecimalField(max_digits=20, decimal_places=2)
     markup = serializers.FloatField(default=1)
-
-
 
     def validate_rates(self, rates):
         # TODO: validate intersections
@@ -236,12 +233,10 @@ class ZoneRatesAdminSerializer(ModelSerializer):
     def create(self, validated_data):
         rates = validated_data.pop('rates')
         zone = super(ZoneRatesAdminSerializer, self).create(validated_data)
-        minimal_price = validated_data.pop('minimal_price')
         markup = validated_data.pop('markup', 1)
-        z = ZonePricingInfo.objects.create(zone=zone, minimal_price=minimal_price, markup=markup)
+        ZonePricingInfo.objects.create(zone=zone, markup=markup)
         for rate in rates:
             ZoneRate.objects.create(**rate, zone=zone)
-        zone.minimal_price = minimal_price
         return zone
 
     def update(self, zone: Zone, validated_data):

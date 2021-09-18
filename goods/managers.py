@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import Manager
 
+
 class GoodCreatableManager(Manager):
 
     def create(self, boxes=None, containers=None):

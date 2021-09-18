@@ -19,7 +19,7 @@ class RouteTimeTableSerializer(serializers.ModelSerializer):
 class PathRouteCreatableSerializer(serializers.ModelSerializer):
     source = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
     destination = PureLookUpFiled(CitySerializer(), lookup_fields=['id', 'slug'])
-
+    description = serializers.CharField(max_length=1000, default='')
     distance = serializers.FloatField()  # km
     duration = serializers.FloatField()  # days
     is_hub = serializers.BooleanField()

@@ -21,6 +21,7 @@ class Path:
 
     fastest: bool = False
     cheapest: bool = False
+    optimal: bool = False
 
     routes: List[Union[HubRoute, RouteInPath]] = field(default_factory=list)
 
@@ -73,7 +74,7 @@ class Container:
 @dataclass
 class Good:
     boxes: List[Box]
-    containers: List[Container]
+    containers: List[Container] = field(default_factory=list)
 
     total_volume: float = 0  # meters codes
     total_ldm: float = 0  # ldm
