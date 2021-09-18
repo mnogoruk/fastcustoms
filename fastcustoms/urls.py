@@ -22,5 +22,6 @@ urlpatterns = [
     path('route/', include('route.urls')),
     path('order/', include('order.urls')),
     path('api-admin/', include('customAdmin.urls')),
-    path('common/', include('common.urls'))
+    path('common/', include('common.urls')),
+    path('report/', include('report.urls'))
 ]

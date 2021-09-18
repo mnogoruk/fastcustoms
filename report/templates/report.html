@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    html {
+        margin: 0;
+        padding: 0;
+    }
+
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+
+    .header {
+        text-align: center;
+        margin-top: 10mm;
+        padding: 0;
+    }
+
+    .logo {
+        width: 185mm;
+        height: auto;
+    }
+
+    .description {
+        text-align: center;
+        font-weight: 700;
+        width: 185mm;
+    }
+
+    .info {
+        margin-top: 12mm;
+        margin-bottom: 12mm;
+        width: 185mm;
+
+    }
+
+    .info-item {
+        margin-bottom: 15mm;
+        margin-top: 15mm;
+    }
+
+    .info-title {
+        font-weight: 600;
+        font-size: 17px;
+        margin-bottom: 5mm;
+    }
+
+    .info-descr {
+        font-size: 15px;
+    }
+
+    .extra-item {
+        margin-bottom: 5px;
+    }
+
+    .extra-title {
+    }
+
+
+    .text {
+        font-weight: 600;
+        font-size: 17px;
+        margin-top: 25mm;
+        width: 100%;
+        text-align: center;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 50px;
+        font-size: 14px;
+        color: gray;
+        width: 100%;
+    }
+
+    footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+    }
+
+    .footer-huy {
+        text-align: center;
+    }
+
+    .footer-pizda {
+        text-align: center;
+    }
+</style>
+<body>
+<div>
+    <img src="{% static 'img/logo.png' %}" class="logo">
+    <h1 class="header">Расчет стоимости перевозки</h1>
+    <div class="description"><span>Уважаемые партнеры, компания Format Logistic выражает
+            Вам свое почтение и приглашает к сотрудничеству в сфере грузоперевозок и таможенного оформления.
+        </span>
+    </div>
+    <div class="info">
+        <div class="info-item">
+            <span class="info-title">Маршрут:</span>
+            <div class="routes">
+                {% for route in path.routes %}
+                    <div>
+                        <span class="info-descr">{{ forloop.counter }}
+                            {% firstof route.source.alias_ru route.source.alias_en route.source.name %}
+                            -
+                            {% firstof route.destination.alias_ru route.destination.alias_en route.destination.name %}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="info-item">
+            <span class="info-title">Стоимость: </span>
+            <span class="info-descr">{{ path.total_cost|floatformat:2  }} €</span>
+        </div>
+        <div class="info-item">
+            <span class="info-title">Время доставки: </span>
+            <span class="info-descr">{{ path.total_duration.min|floatformat:0  }} - {{ path.total_duration.max|floatformat:0  }} дней</span>
+        </div>
+        <div class="info-item">
+            <span class="info-title">Информация о грузе: </span>
+            <span class="info-descr">{{ good.total_volume|floatformat:2  }} м³ {{ good.total_mass|floatformat:2  }} кг</span>
+        </div>
+        {% if extra %}
+            <div class="info-item">
+                <span class="info-title">Дополнительная информация:</span>
+                {% for route in extra.routes %}
+                    <div>
+                        <span class="info-descr extra-title">{% firstof route.source.alias_ru route.source.alias_en route.source.name %} - {% firstof route.source.alias_ru route.source.alias_en route.source.name %}</span>
+                        {% for message in route.description %}
+                            <div>
+                                <span class="info-descr extra-item">{{ forloop.counter }}. {{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="info-item">
+            <span class="info-title">Таможенное оформление: {% if customs %}Да
+            {% else %}
+                Нет
+            {% endif %}</span>
+        </div>
+    </div>
+    <footer>
+        <div class="text">
+            <span class="footer-huy">Надеемся на успешное и плодотворное сотрудничество!</span>
+        </div>
+        <div class="footer">
+            <span class="footer-pizda">
+                440066, Пензенская область, г.Пенза, ул. Рахманинова, дом 1
+                ИНН 5835110919 КПП 583501001 ОГРН 1155835000640
+            </span>
+        </div>
+    </footer>
+
+</div>
+</body>
+</html>

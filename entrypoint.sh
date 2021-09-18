@@ -10,8 +10,7 @@ then
 
     echo "PostgreSQL started"
 fi
-
-python manage.py flush --no-input
-python manage.py migrate
-
+source .env.dev
+export $(cut -d= -f1 .env.dev)
+python manage.py runserver
 exec "$@"
