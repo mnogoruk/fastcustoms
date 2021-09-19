@@ -2,7 +2,8 @@ from django.shortcuts import render
 from rest_framework import status
 from drf_pdf.response import PDFResponse
 from drf_pdf.renderer import PDFRenderer
-from rest_framework.renderers import JSONRenderer
+from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from report.serializer import ReportInputSerializer
@@ -38,8 +39,11 @@ def generate_report(data, base_url):
 
 
 class PDFHandlerView(APIView):
-    renderer_classes = (PDFRenderer, JSONRenderer)
+    renderer_classes = (PDFRenderer, JSONRenderer, BrowsableAPIRenderer)
     get_serializer = ReportInputSerializer
+
+    def get(self, request):
+        return Response(status=status.HTTP_200_OK, data={'d': 1})
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
