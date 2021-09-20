@@ -13,7 +13,16 @@ COST_WEIGHT = 1
 
 
 def sort_func(path: Path, avg_cost, avg_duration):
-    return exp(path.total_cost / avg_cost) * COST_WEIGHT + exp(path.total_duration.max / avg_duration) * DURATION_WEIGHT
+    if avg_cost == 0:
+        duration_c = 0
+    else:
+        duration_c = path.total_duration.max / avg_duration
+
+    if avg_cost == 0:
+        cost_c = 0
+    else:
+        cost_c = path.total_cost / avg_cost
+    return exp(cost_c) * COST_WEIGHT + exp(duration_c) * DURATION_WEIGHT
 
 
 class PathCalculator:
