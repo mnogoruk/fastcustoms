@@ -234,8 +234,8 @@ class PathService:
                                            'route': route}})
         cost_service = cls.cost_by_services(route, good)
         logger.info({'cost_of_hub_route': {'cost_service': cost_service}})
-        cost = max(cost_ldm, cost_size, cost_mass) * route.distance + cost_service
-        price = cost * route.markup
+        cost = float(max(cost_ldm, cost_size, cost_mass)) * float(route.distance) + float(cost_service)
+        price = cost * float(route.markup)
         return price
 
     @classmethod
@@ -248,8 +248,8 @@ class PathService:
         logger.info({'cost_of_auxiliary_route': {'cost_ldm': cost_ldm, 'cost_size': cost_size, 'cost_mass': cost_mass,
                                                  'route': route}})
 
-        cost = max(cost_ldm, cost_size, cost_mass) * distance
-        price = cost * pricing_info.markup
+        cost = float(max(cost_ldm, cost_size, cost_mass)) * float(distance)
+        price = cost * float(pricing_info.markup)
         return price
 
     @classmethod
