@@ -108,6 +108,8 @@ class PathCalculator:
             if float(path.total_cost) < float(cheapest.total_cost):
                 cheapest = path
                 cheapest_ind = ind
+                logger.warning(f'(salt) cheapest_ind: {cheapest_ind}')
+                logger.warning(f'(salt) ind: {ind}')
             if float(path.total_duration.max) < float(fastest.total_duration.max):
                 fastest = path
                 fastest_ind = ind
