@@ -10,7 +10,7 @@ from .models import Path
 import logging
 
 DURATION_WEIGHT = 1
-COST_WEIGHT = 1
+COST_WEIGHT = 3
 
 logger = logging.getLogger('path_calculator')
 
@@ -96,7 +96,6 @@ class PathCalculator:
 
         avg_cost = total_cost / len(paths)
         avg_duration = total_duration / len(paths)
-
         paths = sorted(paths, key=lambda p: sort_func(p, avg_cost, avg_duration))
         fastest = paths[0]
         cheapest = paths[0]
