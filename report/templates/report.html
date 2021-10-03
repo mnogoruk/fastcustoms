@@ -118,15 +118,15 @@
         </div>
         <div class="info-item">
             <span class="info-title">Стоимость: </span>
-            <span class="info-descr">{{ path.total_cost|floatformat:2  }} €</span>
+            <span class="info-descr">{{ path.total_cost|floatformat:2 }} €</span>
         </div>
         <div class="info-item">
             <span class="info-title">Время доставки: </span>
-            <span class="info-descr">{{ path.total_duration.min|floatformat:0  }} - {{ path.total_duration.max|floatformat:0  }} дней</span>
+            <span class="info-descr">{{ path.total_duration.min|floatformat:0 }} - {{ path.total_duration.max|floatformat:0 }} дней</span>
         </div>
         <div class="info-item">
             <span class="info-title">Информация о грузе: </span>
-            <span class="info-descr">{{ good.total_volume|floatformat:2  }} м³ {{ good.total_mass|floatformat:2  }} кг</span>
+            <span class="info-descr">{{ good.total_volume|floatformat:2 }} м³ {{ good.total_mass|floatformat:2 }} кг</span>
         </div>
         {% if extra %}
             <div class="info-item">
@@ -144,7 +144,18 @@
             </div>
         {% endif %}
         <div class="info-item">
-            <span class="info-title">Таможенное оформление: {% if customs %}Да
+            <span class="info-title">Таможенное оформление: {% if customs %}
+                <br>
+                Услуги по таможенному оформлению и предоставление электронно-цифровой подписи (ЭЦП) Таможенного
+                представителя:
+
+                - в порту прибытия – 18 000 руб, вкл. НДС;
+                - в аэропорту – 25 000 руб, вкл. НДC;
+                - в зоне таможенного контроля ж/д контейнерной станции – 26 000 руб, вкл. НДС;
+                - на СВХ по маршрутуследования – 30 000 руб, вкл. НДС;
+
+                До 4 товарных позиций (без учета таможенных платежей и сборов), каждый дополнительный лист к ДТ – 1250
+                руб, вкл. НДС.
             {% else %}
                 Нет
             {% endif %}</span>
