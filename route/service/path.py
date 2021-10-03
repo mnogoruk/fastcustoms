@@ -7,9 +7,12 @@ from route.service.calculate import PathService
 from route.service.models import PathConclusion, Box, Container, Good
 from utils.enums import PlaceType
 from .models import Path
+import logging
 
 DURATION_WEIGHT = 1
 COST_WEIGHT = 1
+
+logger = logging.getLogger('path_calculator')
 
 
 def sort_func(path: Path, avg_cost, avg_duration):
@@ -74,6 +77,7 @@ class PathCalculator:
         ).get(id=place_id)
 
     def sort_paths(self, paths: List[Path]):
+        logger.warning(f'(salt) input paths: {paths}')
         if len(paths) == 0:
             return paths
         elif len(paths) == 1:
@@ -99,7 +103,7 @@ class PathCalculator:
         avg_cost = total_cost / len(paths)
         avg_duration = total_duration / len(paths)
         paths = sorted(paths, key=lambda p: sort_func(p, avg_cost, avg_duration))
-
+        logger.warning(f'(salt) after sort 1: {paths}')
         for ind, path in enumerate(paths):
             if path.total_cost < cheapest.total_cost:
                 cheapest = path
@@ -110,19 +114,22 @@ class PathCalculator:
 
         cheapest.cheapest = True
         fastest.fastest = True
-
+        logger.warning(f'(salt) fastest: ({fastest_ind}){fastest}')
+        logger.warning(f'(salt) cheapest: ({cheapest_ind}){cheapest}')
         if len(paths) > 2:
             paths[0].optimal = True
 
         if cheapest_ind == fastest_ind:
             if cheapest_ind > 0:
                 paths.pop(cheapest_ind)
+                logger.warning(f'(salt) cheapest = fastest, poped paths: {paths})')
                 return [paths[0], cheapest, *paths[1:]]
             else:
                 return paths
         elif cheapest_ind > fastest_ind:
             paths.pop(cheapest_ind)
             paths.pop(fastest_ind)
+            logger.warning(f'(salt) cheapest > fastest, poped paths: {paths})')
             if fastest_ind > 0:
                 return [paths[0], cheapest, fastest, *paths[1:]]
             else:
@@ -130,6 +137,7 @@ class PathCalculator:
         else:
             paths.pop(fastest_ind)
             paths.pop(cheapest_ind)
+            logger.warning(f'(salt) cheapest < fastest, poped paths: {paths})')
             if cheapest_ind > 0:
                 return [paths[0], cheapest, fastest, *paths[1:]]
             else:
@@ -141,5 +149,5 @@ class PathCalculator:
             PathService.calculate(path, self.good, self.special)
 
         paths = self.sort_paths(paths)
-
+        logger.warning(f'(salt) after all sorts paths: {paths})')
         return PathConclusion(source=self.source, destination=self.destination, paths=paths)
