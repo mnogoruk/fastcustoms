@@ -133,7 +133,6 @@
                 <span class="info-title">Дополнительная информация:</span>
                 {% for route in extra.routes %}
                     <div>
-                        <span class="info-descr extra-title">{% firstof route.source.alias_ru route.source.alias_en route.source.name %} - {% firstof route.source.alias_ru route.source.alias_en route.source.name %}</span>
                         {% for message in route.description %}
                             <div>
                                 <span class="info-descr extra-item">{{ forloop.counter }}. {{ message }}</span>
