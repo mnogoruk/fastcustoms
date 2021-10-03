@@ -241,11 +241,9 @@ class ZoneRatesAdminSerializer(ModelSerializer):
 
     def update(self, zone: Zone, validated_data):
         rates = validated_data.pop('rates')
-        minimal_price = validated_data.pop('minimal_price')
         markup = validated_data.pop('markup', 1)
 
         zone = super(ZoneRatesAdminSerializer, self).update(zone, validated_data)
-        zone.pricing_info.minimal_price = minimal_price
         zone.pricing_info.markup = markup
         zone.pricing_info.save()
         zone.rates.all().delete()
