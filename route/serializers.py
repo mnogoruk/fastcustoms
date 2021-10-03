@@ -75,6 +75,7 @@ class PathSerializer(serializers.Serializer):
     total_cost = serializers.DecimalField(max_digits=12, decimal_places=2)
     fastest = serializers.BooleanField(default=False)
     cheapest = serializers.BooleanField(default=False)
+    optimal = serializers.BooleanField(default=False)
 
     routes = PathRouteReadSerializer(many=True)
 
