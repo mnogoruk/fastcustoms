@@ -105,10 +105,10 @@ class PathCalculator:
         paths = sorted(paths, key=lambda p: sort_func(p, avg_cost, avg_duration))
         logger.warning(f'(salt) after sort 1: {paths}')
         for ind, path in enumerate(paths):
-            if path.total_cost < cheapest.total_cost:
+            if float(path.total_cost) < float(cheapest.total_cost):
                 cheapest = path
                 cheapest_ind = ind
-            if path.total_duration.max < fastest.total_duration.max:
+            if float(path.total_duration.max) < float(fastest.total_duration.max):
                 fastest = path
                 fastest_ind = ind
 
