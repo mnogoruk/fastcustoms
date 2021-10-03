@@ -86,6 +86,12 @@ class PathCalculator:
             path.cheapest = True
             path.optimal = True
 
+        fastest = paths[0]
+        cheapest = paths[0]
+
+        fastest_ind = 0
+        cheapest_ind = 0
+
         # for avg
         total_cost = 0
         total_duration = 0
@@ -97,12 +103,6 @@ class PathCalculator:
         avg_cost = total_cost / len(paths)
         avg_duration = total_duration / len(paths)
         paths = sorted(paths, key=lambda p: sort_func(p, avg_cost, avg_duration))
-        fastest = paths[0]
-        cheapest = paths[0]
-
-        fastest_ind = 0
-        cheapest_ind = 0
-
         logger.warning(f'(salt) after sort 1: {paths}')
         for ind, path in enumerate(paths):
             if float(path.total_cost) < float(cheapest.total_cost):
