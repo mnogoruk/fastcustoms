@@ -82,3 +82,8 @@ class MeasurementUnits(SelectableMixin, Enum):
 class RateUseType(SelectableMixin, Enum):
     ROUTE = 'ROUTE'
     ZONE = 'ZONE'
+
+
+class CargoType(SelectableMixin, Enum):
+    BOX = 'BOX'
+    CONTAINER = 'CONTAINER'

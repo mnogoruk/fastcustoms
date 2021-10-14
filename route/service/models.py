@@ -69,6 +69,7 @@ class Box:
 class Container:
     type: str
     amount: int
+    mass: float
 
 
 @dataclass
