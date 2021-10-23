@@ -229,12 +229,12 @@ class PathService:
 
     @classmethod
     def cost_of_hub_route(cls, route: HubRoute, good: Good):
-        cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good)
+        cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good, route.distance)
         logger.info({'cost_of_hub_route': {'cost_ldm': cost_ldm, 'cost_size': cost_size, 'cost_mass': cost_mass,
                                            'route': route}})
         cost_service = cls.cost_by_services(route, good)
         logger.info({'cost_of_hub_route': {'cost_service': cost_service}})
-        cost = float(max(cost_ldm, cost_size, cost_mass)) * float(route.distance) + float(cost_service)
+        cost = float(max(cost_ldm, cost_size, cost_mass)) + float(cost_service)
         price = cost * float(route.markup)
         return price
 
@@ -244,11 +244,11 @@ class PathService:
         pricing_info = zone.pricing_info
         distance = route.distance
 
-        cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good)
+        cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good, distance)
         logger.info({'cost_of_auxiliary_route': {'cost_ldm': cost_ldm, 'cost_size': cost_size, 'cost_mass': cost_mass,
                                                  'route': route}})
 
-        cost = float(max(cost_ldm, cost_size, cost_mass)) * float(distance)
+        cost = float(max(cost_ldm, cost_size, cost_mass))
         price = cost * float(pricing_info.markup)
         return price
 
@@ -285,7 +285,7 @@ class PathService:
         return services_cost
 
     @classmethod
-    def cost_by_ratable(cls, ratable, good):
+    def cost_by_ratable(cls, ratable, good, distance):
         try:
             rate_ldm = ratable.rates.get(
                 range_from__lte=good.total_ldm,
@@ -295,7 +295,7 @@ class PathService:
         except ObjectDoesNotExist:
             cost_ldm = 0
         else:
-            cost_ldm = float(rate_ldm.price_per_unit) * good.total_ldm
+            cost_ldm = float(rate_ldm.price_per_unit) * good.total_ldm * distance
             if cost_ldm < rate_ldm.minimal_price:
                 cost_ldm = rate_ldm.minimal_price
         try:
@@ -307,7 +307,7 @@ class PathService:
         except ObjectDoesNotExist:
             cost_size = 0
         else:
-            cost_size = float(rate_size.price_per_unit) * good.total_volume
+            cost_size = float(rate_size.price_per_unit) * good.total_volume * distance
             if cost_size < rate_size.minimal_price:
                 cost_size = rate_size.minimal_price
         try:
@@ -319,7 +319,7 @@ class PathService:
         except ObjectDoesNotExist:
             cost_mass = 0
         else:
-            cost_mass = float(rate_mass.price_per_unit) * good.total_mass
+            cost_mass = float(rate_mass.price_per_unit) * good.total_mass * distance
             if cost_mass < rate_mass.minimal_price:
                 cost_mass = rate_mass.minimal_price
         return cost_ldm, cost_size, cost_mass
