@@ -51,5 +51,5 @@ class Box(models.Model):
 class Container(models.Model):
     type = models.CharField(max_length=40, default=ContainerType.SMALL.value, choices=ContainerType.choices())
     amount = models.IntegerField()
-
+    mass = models.FloatField()
     good = models.ForeignKey(Good, on_delete=models.CASCADE, related_name='containers')

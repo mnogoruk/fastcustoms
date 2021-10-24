@@ -7,12 +7,12 @@ from rest_framework import serializers
 from geo.models import City, Zone, Country, State
 from geo.serializers import ZoneShortSerializer, CitySerializer, ZoneSerializer, CountrySerializer, StateSerializer
 from order.serializers import OrderSerializer
-from pricing.models import RouteRate, ZoneRate, ServiceAdditional, ServiceRanked, ZonePricingInfo
+from pricing.models import RouteRate, ZoneRate, ServiceAdditional, ServiceRanked, ZonePricingInfo, ContainerRate
 from pricing.serializers import ZoneRateSerializer, ServiceRankedSerializer, ServiceAdditionalSerializer, \
-    RouteRateSerializer
+    RouteRateSerializer, ContainerRateSerializer
 from route.models import HubRoute, RouteTimeTable
 from route.serializers import HubRouteSerializer, RouteTimeTableSerializer, HubRouteShortSerializer
-from utils.enums import RouteType, PlaceType
+from utils.enums import RouteType, PlaceType, CargoType
 from utils.functions import place_type_related_to_route_type
 from utils.serializers.fileds import PureLookUpFiled
 
@@ -54,6 +54,7 @@ class HubRouteAdminSerializer(HubRouteSerializer):
     additional_services = ServiceAdditionalSerializer(many=True, required=False)
     ranked_services = ServiceRankedSerializer(many=True, required=False)
     rates = RouteRateSerializer(many=True)
+    container_rates = ContainerRateSerializer(many=True)
     timetable = RouteTimeTableSerializer(required=False)
 
     def validate_source(self, source):
@@ -113,6 +114,8 @@ class HubRouteAdminSerializer(HubRouteSerializer):
         p_type_s = place_type_related_to_route_type(r_type, 's')
         p_type_d = place_type_related_to_route_type(r_type, 'd')
 
+        cargo_type = validated_data.get('cargo_type')
+        container_rates = validated_data.get('container_rates')
         with transaction.atomic():
             source = validated_data.pop('source')
             source.add_type(p_type_s)
@@ -133,8 +136,12 @@ class HubRouteAdminSerializer(HubRouteSerializer):
                 source=source, destination=destination, timetable=timetable, **validated_data
             )
 
-            for rate in rates:
-                RouteRate.objects.create(**rate, route=route)
+            if cargo_type == CargoType.BOX.value:
+                for rate in rates:
+                    RouteRate.objects.create(**rate, route=route)
+            else:
+                for rate in container_rates:
+                    ContainerRate.objects.create(**rate, route=route)
 
             for service in additional_services:
                 ServiceAdditional.objects.create(**service, route=route)
@@ -151,11 +158,18 @@ class HubRouteAdminSerializer(HubRouteSerializer):
         if 'destination' in validated_data:
             destination = validated_data.pop('destination')
             route.destination = destination
-        if 'rates' in validated_data:
-            rates = validated_data.pop('rates')
-            route.rates.all().delete()
-            for rate in rates:
-                RouteRate.objects.create(**rate, route=route)
+        if route.cargo_type == CargoType.CONTAINER.value:
+            if 'container_rates' in validated_data:
+                rates = validated_data.pop('container_rates')
+                route.container_rates.all().delete()
+                for rate in rates:
+                    ContainerRate.objects.create(**rate, route=route)
+        else:
+            if 'rates' in validated_data:
+                rates = validated_data.pop('rates')
+                route.rates.all().delete()
+                for rate in rates:
+                    RouteRate.objects.create(**rate, route=route)
         if 'timetable' in validated_data:
             route.timetable.delete()
             timetable = RouteTimeTable.objects.create(**validated_data.pop('timetable'))
