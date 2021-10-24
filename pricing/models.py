@@ -3,7 +3,7 @@ from geo.models import Zone
 from pricing.managers import RateManager
 from route.models import HubRoute
 from utils.db.models import AbstractCreate
-from utils.enums import Currency, RateType
+from utils.enums import Currency, RateType, ContainerType
 
 
 class AbstractRate(AbstractCreate):
@@ -64,3 +64,11 @@ class ServiceRanked(AbstractCreate):
 class ZonePricingInfo(models.Model):
     zone = models.OneToOneField(Zone, on_delete=models.CASCADE, related_name='pricing_info')
     markup = models.FloatField(default=1)
+
+
+class ContainerRate(models.Model):
+    container_type = models.CharField(max_length=20, choices=ContainerType.choices())
+    max_mass = models.FloatField()
+    price_per_overload = models.DecimalField(max_digits=20, decimal_places=8)
+    cost = models.DecimalField(max_digits=20, decimal_places=2)
+    route = models.ForeignKey(HubRoute, on_delete=models.CASCADE, related_name='container_rates')

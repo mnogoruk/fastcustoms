@@ -11,7 +11,7 @@ from route.models import HubRoute, RouteInPath
 from route.service import models as dataclass
 from route.service.models import PathDuration, Good, Special
 from route.service.raw_queries import ROUTES_VIA_WAYPOINT_ZONE_QUERY
-from utils.enums import RouteType, RateType, PlaceType
+from utils.enums import RouteType, RateType, PlaceType, CargoType
 from route import models
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -26,10 +26,10 @@ class PathService:
         cls.API_CLASS = api_class
 
     @classmethod
-    def paths(cls, source: City, dest: City, source_type, destination_type) -> List[dataclass.Path]:
+    def paths(cls, source: City, dest: City, source_type, destination_type, cargo_type) -> List[dataclass.Path]:
 
         # better if source and dest objects all have prefetched zone instance
-        hub_routes = cls.hub_routes(source, dest, source_type, destination_type)
+        hub_routes = cls.hub_routes(source, dest, cargo_type, source_type, destination_type)
 
         if len(hub_routes) == 0:
             return []
@@ -199,13 +199,13 @@ class PathService:
         return path
 
     @classmethod
-    def hub_routes(cls, source: City, dest: City, source_type=PlaceType.default().value,
-                   destination_type=PlaceType.default().value):
+    def hub_routes(cls, source: City, dest: City, cargo_type, source_type=PlaceType.default().value,
+                   destination_type=PlaceType.default().value, ):
         """ Search all routes from source zone to destination zone. U """
         source_zone = source.state.zone
         dest_zone = dest.state.zone
 
-        routes_query = HubRoute.objects.filter(active=True)
+        routes_query = HubRoute.objects.filter(active=True, cargo_type=cargo_type)
 
         if source_zone is None or dest_zone is None:
             return []
@@ -222,21 +222,45 @@ class PathService:
 
         routes = [(route,) for route in routes_query.all()]
 
-        routes_via_waypoint = cls.routes_via_waypoint_zone(source_zone, dest_zone, source_type, destination_type)
+        routes_via_waypoint = cls.routes_via_waypoint_zone(source_zone, dest_zone, cargo_type, source_type,
+                                                           destination_type)
 
         routes += routes_via_waypoint
         return routes
 
     @classmethod
     def cost_of_hub_route(cls, route: HubRoute, good: Good):
-        cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good)
-        logger.info({'cost_of_hub_route': {'cost_ldm': cost_ldm, 'cost_size': cost_size, 'cost_mass': cost_mass,
-                                           'route': route}})
+        if route.cargo_type == CargoType.BOX.value:
+            cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(route, good, route.distance)
+            logger.info({'cost_of_hub_route': {'cost_ldm': cost_ldm, 'cost_size': cost_size, 'cost_mass': cost_mass,
+                                               'route': route}})
+            cost = float(max(cost_ldm, cost_size, cost_mass))
+        else:
+            cost = cls.cost_by_route_with_container(route, good)
+
         cost_service = cls.cost_by_services(route, good)
         logger.info({'cost_of_hub_route': {'cost_service': cost_service}})
-        cost = float(max(cost_ldm, cost_size, cost_mass)) * float(route.distance) + float(cost_service)
+        cost = cost + float(cost_service)
         price = cost * float(route.markup)
         return price
+
+    @classmethod
+    def cost_by_route_with_container(cls, route, good: Good):
+        total_cost = 0
+        for container in good.containers:
+            try:
+                container_rate = route.container_rates.get(
+                    container_type=container.type,
+                )
+                cost = float(container_rate.cost)
+                if float(container.mass) > float(container_rate.max_mass):
+                    cost = cost + float(container_rate.price_per_overload) * (
+                            float(container.mass) - float(container_rate.max_mass))
+
+                total_cost += cost * float(container.amount)
+            except ObjectDoesNotExist as ex:
+                logger.error(f'No container type for route {route}', exc_info=ex)
+        return total_cost
 
     @classmethod
     def cost_of_auxiliary_route(cls, route: RouteInPath, good: Good):
@@ -244,20 +268,22 @@ class PathService:
         pricing_info = zone.pricing_info
         distance = route.distance
 
-        cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good)
+        cost_ldm, cost_size, cost_mass = cls.cost_by_ratable(zone, good, distance)
         logger.info({'cost_of_auxiliary_route': {'cost_ldm': cost_ldm, 'cost_size': cost_size, 'cost_mass': cost_mass,
                                                  'route': route}})
 
-        cost = float(max(cost_ldm, cost_size, cost_mass)) * float(distance)
+        cost = float(max(cost_ldm, cost_size, cost_mass))
         price = cost * float(pricing_info.markup)
         return price
 
     @classmethod
-    def routes_via_waypoint_zone(cls, source_zone, destination_zone, source_type=PlaceType.default().value,
+    def routes_via_waypoint_zone(cls, source_zone, destination_zone, cargo_type, source_type=PlaceType.default().value,
                                  destination_type=PlaceType.default().value):
         with connection.cursor() as cursor:
             cursor.execute(ROUTES_VIA_WAYPOINT_ZONE_QUERY,
-                           [source_zone.id, source_type, destination_zone.id, destination_type])
+                           {'source_id': source_zone.id, 'source_type': source_type,
+                            'description_id': destination_zone.id, 'destination_type': destination_type,
+                            'cargo_type': cargo_type})
             rows = cursor.fetchall()
         return cls.to_routes(rows)
 
@@ -285,7 +311,7 @@ class PathService:
         return services_cost
 
     @classmethod
-    def cost_by_ratable(cls, ratable, good):
+    def cost_by_ratable(cls, ratable, good, distance):
         try:
             rate_ldm = ratable.rates.get(
                 range_from__lte=good.total_ldm,
@@ -295,7 +321,7 @@ class PathService:
         except ObjectDoesNotExist:
             cost_ldm = 0
         else:
-            cost_ldm = float(rate_ldm.price_per_unit) * good.total_ldm
+            cost_ldm = float(rate_ldm.price_per_unit) * good.total_ldm * distance
             if cost_ldm < rate_ldm.minimal_price:
                 cost_ldm = rate_ldm.minimal_price
         try:
@@ -307,7 +333,7 @@ class PathService:
         except ObjectDoesNotExist:
             cost_size = 0
         else:
-            cost_size = float(rate_size.price_per_unit) * good.total_volume
+            cost_size = float(rate_size.price_per_unit) * good.total_volume * distance
             if cost_size < rate_size.minimal_price:
                 cost_size = rate_size.minimal_price
         try:
@@ -319,7 +345,7 @@ class PathService:
         except ObjectDoesNotExist:
             cost_mass = 0
         else:
-            cost_mass = float(rate_mass.price_per_unit) * good.total_mass
+            cost_mass = float(rate_mass.price_per_unit) * good.total_mass * distance
             if cost_mass < rate_mass.minimal_price:
                 cost_mass = rate_mass.minimal_price
         return cost_ldm, cost_size, cost_mass

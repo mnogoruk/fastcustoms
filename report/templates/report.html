@@ -41,14 +41,14 @@
     }
 
     .info-item {
-        margin-bottom: 15mm;
-        margin-top: 15mm;
+        margin-bottom: 2mm;
+        margin-top: 2mm;
     }
 
     .info-title {
         font-weight: 600;
         font-size: 17px;
-        margin-bottom: 5mm;
+        margin-bottom: 1mm;
     }
 
     .info-descr {
@@ -133,7 +133,6 @@
                 <span class="info-title">Дополнительная информация:</span>
                 {% for route in extra.routes %}
                     <div>
-                        <span class="info-descr extra-title">{% firstof route.source.alias_ru route.source.alias_en route.source.name %} - {% firstof route.source.alias_ru route.source.alias_en route.source.name %}</span>
                         {% for message in route.description %}
                             <div>
                                 <span class="info-descr extra-item">{{ forloop.counter }}. {{ message }}</span>
@@ -144,21 +143,23 @@
             </div>
         {% endif %}
         <div class="info-item">
-            <span class="info-title">Таможенное оформление: {% if customs %}
+            <span class="info-title">Таможенное оформление: {% if customs %}</span>
                 <br>
-                Услуги по таможенному оформлению и предоставление электронно-цифровой подписи (ЭЦП) Таможенного
-                представителя:
-
-                - в порту прибытия – 18 000 руб, вкл. НДС;
-                - в аэропорту – 25 000 руб, вкл. НДC;
-                - в зоне таможенного контроля ж/д контейнерной станции – 26 000 руб, вкл. НДС;
-                - на СВХ по маршрутуследования – 30 000 руб, вкл. НДС;
-
-                До 4 товарных позиций (без учета таможенных платежей и сборов), каждый дополнительный лист к ДТ – 1250
-                руб, вкл. НДС.
+                <div>Услуги по таможенному оформлению и предоставление электронно-цифровой подписи (ЭЦП) Таможенного
+                    представителя:
+                </div>
+                <br/>
+                <div>- в порту прибытия – 18 000 руб, вкл. НДС;</div>
+                <div>- в аэропорту – 25 000 руб, вкл. НДC;</div>
+                <div>- в зоне таможенного контроля ж/д контейнерной станции – 26 000 руб, вкл. НДС;</div>
+                <div>- на СВХ по маршрутуследования – 30 000 руб, вкл. НДС;</div>
+                <br/>
+                <div>До 4 товарных позиций (без учета таможенных платежей и сборов), каждый дополнительный лист к ДТ –
+                    1250 руб, вкл. НДС.
+                </div>
             {% else %}
-                Нет
-            {% endif %}</span>
+                <span>Нет</span>
+            {% endif %}
         </div>
     </div>
     <footer>

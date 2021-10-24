@@ -7,7 +7,7 @@ from django.db.models import Manager
 from geo.models import City, Zone
 from map.here.api import MapAPI
 from route.managers import HubRouteManager, PathCreatableManager
-from utils.enums import RouteType
+from utils.enums import RouteType, CargoType
 from utils.db.models import AbstractCreate
 from utils.functions import circle_search
 from datetime import date
@@ -32,6 +32,8 @@ class HubRoute(AbstractCreate):
     destination = models.ForeignKey(City, on_delete=models.CASCADE, related_name='hub_routes_as_destination')
 
     type = models.CharField(max_length=20, default=RouteType.TRUCK.value, choices=RouteType.choices())
+
+    cargo_type = models.CharField(max_length=20, default=CargoType.BOX.value, choices=CargoType.choices())
 
     timetable = models.OneToOneField(RouteTimeTable, on_delete=models.SET_NULL, null=True)
     distance = models.FloatField()  # km
