@@ -5,7 +5,7 @@ from geo.models import City
 from order.models import Special
 from route.service.calculate import PathService
 from route.service.models import PathConclusion, Box, Container, Good
-from utils.enums import PlaceType
+from utils.enums import PlaceType, CargoType
 from .models import Path
 import logging
 
@@ -35,7 +35,13 @@ class PathCalculator:
         self.destination = self.get_place(data.pop('destination', {}).pop('id'))
         self.source_type = data.pop('source_type', PlaceType.default().value)
         self.destination_type = data.pop('destination_type', PlaceType.default().value)
-        self.good = self.built_good(good_data=data.pop('good', {}))
+        self.good = self.built_good(good_data=data.pop('good', {'boxes': [], 'containers': []}))
+        if len(self.good.containers) > 0:
+            self.cargo_type = CargoType.CONTAINER.value
+        elif len(self.good.boxes) > 0:
+            self.cargo_type = CargoType.BOX.value
+        else:
+            raise ValueError('Good must contains boxes or containers')
         self.special = self.build_special(special_data=data.pop('special', {}))
 
     @classmethod
@@ -59,7 +65,8 @@ class PathCalculator:
             containers.append(
                 Container(
                     type=container['type'],
-                    amount=container['amount']
+                    amount=container['amount'],
+                    mass=container['mass']
                 )
             )
         good = Good(boxes=boxes, containers=containers)
@@ -146,7 +153,8 @@ class PathCalculator:
                 return [cheapest, fastest, *paths]
 
     def get_path_conclusion(self):
-        paths = PathService.paths(self.source, self.destination, self.source_type, self.destination_type)
+        paths = PathService.paths(self.source, self.destination, self.source_type,
+                                  self.destination_type, self.cargo_type)
         for path in paths:
             PathService.calculate(path, self.good, self.special)
 
