@@ -100,3 +100,15 @@ def associate_zones_to_countries():
             zone = Zone.objects.create(name=country.name, slug=country.slug)
             zone.associate_with_country(country)
             zone.save()
+
+
+def cities_with_countries():
+    data = City.objects \
+        .select_related('state') \
+        .select_related('state__country') \
+        .order_by('state__country__name') \
+        .order_by('state__name') \
+        .order_by('name') \
+        .values_list('name', 'state__name', 'state__country__name')
+    df = pd.DataFrame(data, columns=['city_name', 'state_name', 'country_name'])
+    df.to_excel('cities.xlsx', encoding='utf-8')

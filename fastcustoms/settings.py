@@ -103,15 +103,15 @@ DATABASES = {'default': dj_database_url.config(env='HEROKU_POSTGRESQL_JADE_URL',
 options = DATABASES['default'].get('OPTIONS', {})
 options.pop('sslmode', None)
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'fastcustoms',
-#         'USER': 'postgres',
-#         'PASSWORD': '1',
-#         'PORT': 5432
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'fastcustoms',
+        'USER': 'postgres',
+        'PASSWORD': '1',
+        'PORT': 5432
+    }
+}
 
 
 
